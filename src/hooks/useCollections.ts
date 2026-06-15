@@ -335,6 +335,101 @@ export function useCollections() {
     }
   };
 
+  const duplicateRequest = async (requestId: string) => {
+    try {
+      const db = await getDb();
+      const now = Date.now();
+
+      const reqs = (await db.select('SELECT * FROM requests WHERE id = ?', [requestId])) as any[];
+      if (reqs.length === 0) return;
+      const req = reqs[0];
+
+      const newReqId = crypto.randomUUID();
+      await db.execute(
+        `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          newReqId,
+          req.collection_id,
+          req.name + ' (Copy)',
+          req.method,
+          req.url,
+          req.headers,
+          req.params,
+          req.body_type,
+          req.body,
+          req.auth_type,
+          req.auth_data,
+          now,
+          now,
+        ]
+      );
+
+      await loadCollections();
+    } catch (error) {
+      console.error('Failed to duplicate request:', error);
+      throw error;
+    }
+  };
+
+  const duplicateCollection = async (collectionId: string) => {
+    try {
+      const db = await getDb();
+      const now = Date.now();
+
+      const dupNode = async (oldColId: string, parentColId: string | null) => {
+        const cols = (await db.select('SELECT * FROM collections WHERE id = ?', [oldColId])) as any[];
+        if (cols.length === 0) return;
+        const col = cols[0];
+        
+        const newColId = crypto.randomUUID();
+        await db.execute(
+          `INSERT INTO collections (id, name, description, parent_id, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [newColId, col.name + ' (Copy)', col.description || null, parentColId, now, now]
+        );
+
+        const reqs = (await db.select('SELECT * FROM requests WHERE collection_id = ?', [oldColId])) as any[];
+        for (const req of reqs) {
+          const newReqId = crypto.randomUUID();
+          await db.execute(
+            `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              newReqId,
+              newColId,
+              req.name,
+              req.method,
+              req.url,
+              req.headers,
+              req.params,
+              req.body_type,
+              req.body,
+              req.auth_type,
+              req.auth_data,
+              now,
+              now,
+            ]
+          );
+        }
+
+        const childCols = (await db.select('SELECT id FROM collections WHERE parent_id = ?', [oldColId])) as any[];
+        for (const child of childCols) {
+          await dupNode(child.id, newColId);
+        }
+      };
+
+      const originalCols = (await db.select('SELECT parent_id FROM collections WHERE id = ?', [collectionId])) as any[];
+      const parentId = originalCols.length > 0 ? originalCols[0].parent_id : null;
+
+      await dupNode(collectionId, parentId);
+      await loadCollections();
+    } catch (error) {
+      console.error('Failed to duplicate collection:', error);
+      throw error;
+    }
+  };
+
   return {
     collections,
     loading,
@@ -345,6 +440,8 @@ export function useCollections() {
     saveRequest,
     deleteRequest,
     moveRequest,
+    duplicateRequest,
+    duplicateCollection,
     getCollectionExportData,
     importCollection,
   };
