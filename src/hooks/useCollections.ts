@@ -320,6 +320,21 @@ export function useCollections() {
     }
   };
 
+  const moveRequest = async (requestId: string, targetCollectionId: string) => {
+    try {
+      const db = await getDb();
+      const now = Date.now();
+      await db.execute(
+        `UPDATE requests SET collection_id = ?, updated_at = ? WHERE id = ?`,
+        [targetCollectionId, now, requestId]
+      );
+      await loadCollections();
+    } catch (error) {
+      console.error('Failed to move request:', error);
+      throw error;
+    }
+  };
+
   return {
     collections,
     loading,
@@ -329,6 +344,7 @@ export function useCollections() {
     deleteCollection,
     saveRequest,
     deleteRequest,
+    moveRequest,
     getCollectionExportData,
     importCollection,
   };
