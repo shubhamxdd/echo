@@ -203,7 +203,7 @@ export function Sidebar({
       </div>
 
       {/* Scrollable Tree/List Area */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-4">
         {activeTab === 'collections' ? (
           <CollectionTree
             collections={filteredCollections}

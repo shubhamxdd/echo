@@ -139,6 +139,38 @@ function App() {
   const [snippetModalOpen, setSnippetModalOpen] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Panel Resizer State and Helpers
+  const [requestPanelHeight, setRequestPanelHeight] = useState(380);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizing) {
+      const newHeight = mouseMoveEvent.clientY - 90; // offset header
+      const clampedHeight = Math.max(180, Math.min(window.innerHeight - 180, newHeight));
+      setRequestPanelHeight(clampedHeight);
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+
   // 2. Initialize SQLite Database
   useEffect(() => {
     async function setup() {
@@ -956,7 +988,10 @@ function App() {
         </div>
 
         {/* Request Panel (Top Half) */}
-        <div className="flex-[55] min-h-[220px] overflow-hidden flex flex-col">
+        <div
+          className="overflow-hidden flex flex-col shrink-0"
+          style={{ height: `${requestPanelHeight}px` }}
+        >
           <RequestPanel
             method={method}
             onMethodChange={setMethod}
@@ -982,8 +1017,15 @@ function App() {
           />
         </div>
 
+        {/* Vertical Resizer Handle */}
+        <div
+          className="h-1 bg-zinc-800 hover:bg-orange-500 cursor-row-resize transition-colors shrink-0"
+          onMouseDown={startResizing}
+          title="Drag to resize panels"
+        />
+
         {/* Response Panel (Bottom Half) */}
-        <div className="flex-[45] min-h-[180px] overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-[150px] overflow-hidden flex flex-col">
           <ResponsePanel response={activeResponse} loading={requestLoading} />
         </div>
       </div>
