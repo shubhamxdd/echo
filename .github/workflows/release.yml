@@ -1,40 +1,106 @@
-# .github/workflows/build-linux.yml
-name: Build Linux
+# .github/workflows/release.yml
+name: Build & Release
 
 on:
-  workflow_dispatch:  # Manual trigger from GitHub UI
   push:
-    branches: [main]
+    tags:
+      - 'v*'
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-22.04
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows
+          - os: windows-latest
+            name: windows
+
+          # Ubuntu
+          - os: ubuntu-22.04
+            name: ubuntu
+
+          # Fedora (runs on ubuntu but builds rpm too via cross tools)
+          - os: ubuntu-latest
+            name: fedora
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install Linux dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev \
-            libayatana-appindicator3-dev librsvg2-dev
+          cache: 'npm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install frontend deps
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install Ubuntu dependencies
+        if: matrix.name == 'ubuntu'
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libwebkit2gtk-4.1-dev \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install Fedora RPM build dependencies
+        if: matrix.name == 'fedora'
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libwebkit2gtk-4.1-dev \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            rpm  # enables .rpm bundling on ubuntu runner
+
+      - name: Install frontend dependencies
         run: npm install
 
-      - uses: tauri-apps/tauri-action@v0
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Build & Release (Windows)
+        if: matrix.name == 'windows'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: linux-builds
-          path: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/rpm/*.rpm
-            src-tauri/target/release/bundle/appimage/*.AppImage
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Release ${{ github.ref_name }}'
+          releaseDraft: false
+          prerelease: false
+          args: --bundles msi,nsis
+
+      - name: Build & Release (Ubuntu)
+        if: matrix.name == 'ubuntu'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Release ${{ github.ref_name }}'
+          releaseDraft: false
+          prerelease: false
+          args: --bundles deb,appimage
+
+      - name: Build & Release (Fedora RPM)
+        if: matrix.name == 'fedora'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Release ${{ github.ref_name }}'
+          releaseDraft: false
+          prerelease: false
+          args: --bundles rpm
