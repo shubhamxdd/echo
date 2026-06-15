@@ -8,7 +8,7 @@ import { useCollections } from './hooks/useCollections';
 import { useHistory } from './hooks/useHistory';
 import { useRequest } from './hooks/useRequest';
 import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } from './types';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -41,6 +41,7 @@ function App() {
     deleteCollection,
     saveRequest,
     deleteRequest,
+    moveRequest,
     getCollectionExportData,
     importCollection,
   } = useCollections();
@@ -110,6 +111,14 @@ function App() {
   const [saveReqCollectionId, setSaveReqCollectionId] = useState('');
 
   const [shortcutModalOpen, setShortcutModalOpen] = useState(false);
+
+  // Sidebar collapsed state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Move request modal states
+  const [moveReqModalOpen, setMoveReqModalOpen] = useState(false);
+  const [moveReqTargetId, setMoveReqTargetId] = useState<string | null>(null);
+  const [moveReqCollectionId, setMoveReqCollectionId] = useState('');
 
   // 2. Initialize SQLite Database
   useEffect(() => {
@@ -380,7 +389,18 @@ function App() {
     setAuthType('none');
     setAuthData({});
     setActiveRequestMeta({ id: null, collectionId: null, name: null });
-    setActiveResponse(null);
+    if (item.status_code !== null || item.error) {
+      setActiveResponse({
+        status: item.status_code || 0,
+        statusText: item.error ? 'Error' : getStatusText(item.status_code || 0),
+        duration_ms: item.duration_ms || 0,
+        headers: item.response_headers || [],
+        body: item.response_body || '',
+        error: item.error || null,
+      });
+    } else {
+      setActiveResponse(null);
+    }
   };
 
   // 11. Send Request handler
@@ -519,6 +539,51 @@ function App() {
     return result;
   };
 
+  // Move request handlers
+  const handleOpenMoveRequestModal = (requestId: string, currentCollectionId: string) => {
+    setMoveReqTargetId(requestId);
+    setMoveReqCollectionId(currentCollectionId);
+    setMoveReqModalOpen(true);
+  };
+
+  const handleConfirmMove = async () => {
+    if (!moveReqTargetId || !moveReqCollectionId) return;
+    try {
+      await moveRequest(moveReqTargetId, moveReqCollectionId);
+      
+      // Update activeRequestMeta if the moved request is the active one
+      if (activeRequestMeta.id === moveReqTargetId) {
+        setActiveRequestMeta(prev => ({
+          ...prev,
+          collectionId: moveReqCollectionId
+        }));
+      }
+
+      // Also update matching tabs so state synchronizes
+      setTabs(prevTabs => prevTabs.map(t => {
+        if (t.savedRequestId === moveReqTargetId) {
+          return {
+            ...t,
+            collectionId: moveReqCollectionId
+          };
+        }
+        return t;
+      }));
+
+      setMoveReqModalOpen(false);
+    } catch (err) {
+      console.error('Failed to move request:', err);
+    }
+  };
+
+  const getStatusText = (status: number) => {
+    if (status >= 200 && status < 300) return 'OK';
+    if (status >= 300 && status < 400) return 'Redirect';
+    if (status >= 400 && status < 500) return 'Client/Network Error';
+    if (status >= 500) return 'Server Error';
+    return 'OK';
+  };
+
   // Folder modal handlers
   const openCreateColModal = (parentId: string | null = null) => {
     setColModalMode('create');
@@ -611,38 +676,51 @@ function App() {
   return (
     <div className="flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans select-none">
       {/* 1. Left Sidebar */}
-      <Sidebar
-        collections={collections}
-        historyItems={historyList}
-        activeRequestId={activeRequestMeta.id}
-        onRequestSelect={handleRequestSelect}
-        onHistorySelect={handleHistorySelect}
-        onDeleteHistoryItem={deleteHistoryItem}
-        onClearHistory={clearHistory}
-        onCreateCollectionClick={() => openCreateColModal(null)}
-        onCreateSubfolder={(parentId) => openCreateColModal(parentId)}
-        onCreateRequest={handleSidebarCreateRequest}
-        onRenameFolder={openRenameColModal}
-        onDeleteFolder={deleteCollection}
-        onDeleteRequest={(id) => {
-          deleteRequest(id);
-          const tab = tabs.find((t) => t.savedRequestId === id);
-          if (tab) {
-            // Force close tab
-            const syntheticEvent = { stopPropagation: () => {} } as any;
-            closeTab(tab.id, syntheticEvent);
-          }
-        }}
-        onExportFolder={handleExportFolder}
-        onImportCollection={handleImportCollection}
-        onHelpClick={() => setShortcutModalOpen(true)}
-      />
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[280px]'} h-full shrink-0 flex overflow-hidden border-r border-zinc-800/80`}>
+        <div className="w-[280px] h-full flex flex-col shrink-0">
+          <Sidebar
+            collections={collections}
+            historyItems={historyList}
+            activeRequestId={activeRequestMeta.id}
+            onRequestSelect={handleRequestSelect}
+            onHistorySelect={handleHistorySelect}
+            onDeleteHistoryItem={deleteHistoryItem}
+            onClearHistory={clearHistory}
+            onCreateCollectionClick={() => openCreateColModal(null)}
+            onCreateSubfolder={(parentId) => openCreateColModal(parentId)}
+            onCreateRequest={handleSidebarCreateRequest}
+            onRenameFolder={openRenameColModal}
+            onDeleteFolder={deleteCollection}
+            onDeleteRequest={(id) => {
+              deleteRequest(id);
+              const tab = tabs.find((t) => t.savedRequestId === id);
+              if (tab) {
+                // Force close tab
+                const syntheticEvent = { stopPropagation: () => {} } as any;
+                closeTab(tab.id, syntheticEvent);
+              }
+            }}
+            onExportFolder={handleExportFolder}
+            onImportCollection={handleImportCollection}
+            onHelpClick={() => setShortcutModalOpen(true)}
+            onMoveRequest={handleOpenMoveRequestModal}
+          />
+        </div>
+      </div>
 
       {/* 2. Main Workspace */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Top Header Bar */}
         <div className="bg-zinc-900/40 border-b border-zinc-800/80 px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="text-zinc-400 hover:text-zinc-100 p-1.5 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer flex items-center justify-center mr-1"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+            </button>
+
             <span className="text-xs text-zinc-500 font-medium select-none">Active Work:</span>
             {activeRequestMeta.id ? (
               <span className="text-xs font-semibold text-orange-300 font-mono">
@@ -711,7 +789,7 @@ function App() {
         </div>
 
         {/* Request Panel (Top Half) */}
-        <div className="flex-1 min-h-[300px]">
+        <div className="flex-[55] min-h-[220px] overflow-hidden flex flex-col">
           <RequestPanel
             method={method}
             onMethodChange={setMethod}
@@ -736,7 +814,7 @@ function App() {
         </div>
 
         {/* Response Panel (Bottom Half) */}
-        <div className="h-[360px] flex-shrink-0">
+        <div className="flex-[45] min-h-[180px] overflow-hidden flex flex-col">
           <ResponsePanel response={activeResponse} loading={requestLoading} />
         </div>
       </div>
@@ -887,6 +965,52 @@ function App() {
               className="px-3.5 py-1.5 rounded-md text-xs bg-zinc-800 hover:bg-zinc-750 text-zinc-200 transition-colors cursor-pointer"
             >
               Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Move Request Modal */}
+      <Modal
+        isOpen={moveReqModalOpen}
+        onClose={() => setMoveReqModalOpen(false)}
+        title="Move Request"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="block text-[11px] font-semibold text-zinc-400">Select Target Collection</label>
+            {collections.length === 0 ? (
+              <div className="text-xs text-amber-400 bg-amber-500/5 border border-amber-500/10 p-2 rounded-md">
+                No collections available. Please create a collection folder in the sidebar first!
+              </div>
+            ) : (
+              <select
+                value={moveReqCollectionId}
+                onChange={(e) => setMoveReqCollectionId(e.target.value)}
+                className="bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-zinc-200 text-xs w-full cursor-pointer"
+              >
+                {flattenCollections(collections).map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-2 border-t border-zinc-800 pt-3 mt-4">
+            <button
+              onClick={() => setMoveReqModalOpen(false)}
+              className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:bg-zinc-850 hover:text-zinc-250 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmMove}
+              disabled={!moveReqCollectionId || collections.length === 0}
+              className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Move Request
             </button>
           </div>
         </div>
