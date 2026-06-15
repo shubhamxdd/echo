@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --bg-base: #09090b;
+  --bg-surface: #18181b;
+  --bg-panel: rgba(39, 39, 42, 0.4);
+  --text-primary: #fafafa;
+  --text-muted: #a1a1aa;
+  --accent-primary: #a78bfa;
+  --border-default: #27272a;
+  --state-success: #34d399;
+  --state-error: #f87171;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+}
