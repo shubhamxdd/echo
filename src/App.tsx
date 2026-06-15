@@ -684,20 +684,34 @@ function App() {
             activeRequestId={activeRequestMeta.id}
             onRequestSelect={handleRequestSelect}
             onHistorySelect={handleHistorySelect}
-            onDeleteHistoryItem={deleteHistoryItem}
-            onClearHistory={clearHistory}
+            onDeleteHistoryItem={(id) => {
+              if (confirm("Are you sure you want to delete this history item?")) {
+                deleteHistoryItem(id);
+              }
+            }}
+            onClearHistory={() => {
+              if (confirm("Are you sure you want to clear your entire request history? This action cannot be undone.")) {
+                clearHistory();
+              }
+            }}
             onCreateCollectionClick={() => openCreateColModal(null)}
             onCreateSubfolder={(parentId) => openCreateColModal(parentId)}
             onCreateRequest={handleSidebarCreateRequest}
             onRenameFolder={openRenameColModal}
-            onDeleteFolder={deleteCollection}
+            onDeleteFolder={(id) => {
+              if (confirm("Are you sure you want to delete this collection? This will permanently delete all sub-collections and requests inside it.")) {
+                deleteCollection(id);
+              }
+            }}
             onDeleteRequest={(id) => {
-              deleteRequest(id);
-              const tab = tabs.find((t) => t.savedRequestId === id);
-              if (tab) {
-                // Force close tab
-                const syntheticEvent = { stopPropagation: () => {} } as any;
-                closeTab(tab.id, syntheticEvent);
+              if (confirm("Are you sure you want to delete this saved request?")) {
+                deleteRequest(id);
+                const tab = tabs.find((t) => t.savedRequestId === id);
+                if (tab) {
+                  // Force close tab
+                  const syntheticEvent = { stopPropagation: () => {} } as any;
+                  closeTab(tab.id, syntheticEvent);
+                }
               }
             }}
             onExportFolder={handleExportFolder}
