@@ -207,10 +207,10 @@ function App() {
   useEffect(() => {
     if (tourOpen) {
       setMethod('GET');
-      setUrl('https://api.echo-rest.com/v1/users');
+      setUrl('https://fakestoreapi.com/users');
       setParams([
-        { key: 'limit', value: '10', enabled: true },
-        { key: 'status', value: 'active', enabled: true }
+        { key: 'limit', value: '5', enabled: true },
+        { key: '', value: '', enabled: true }
       ]);
       setHeaders([
         { key: 'Accept', value: 'application/json', enabled: true },
@@ -223,19 +223,41 @@ function App() {
       setActiveResponse({
         status: 200,
         statusText: 'OK',
-        duration_ms: 42,
+        duration_ms: 184,
         headers: [
-          { key: 'Content-Type', value: 'application/json', enabled: true },
-          { key: 'Server', value: 'Echo/1.0.0', enabled: true }
+          { key: 'content-type', value: 'application/json; charset=utf-8', enabled: true },
+          { key: 'x-powered-by', value: 'Express', enabled: true }
         ],
-        body: JSON.stringify({
-          status: "success",
-          results: 2,
-          users: [
-            { id: 1, name: "Alice", role: "Admin" },
-            { id: 2, name: "Bob", role: "Developer" }
-          ]
-        }, null, 2),
+        body: JSON.stringify([
+          {
+            address: {
+              geolocation: { lat: "-37.3159", long: "81.1496" },
+              city: "kilcoole",
+              street: "new road",
+              number: 7682,
+              zipcode: "12926-3874"
+            },
+            id: 1,
+            email: "john@gmail.com",
+            username: "johnd",
+            name: { firstname: "john", lastname: "doe" },
+            phone: "1-570-236-7033"
+          },
+          {
+            address: {
+              geolocation: { lat: "-37.3159", long: "81.1496" },
+              city: "kilcoole",
+              street: "Lovers Ln",
+              number: 7267,
+              zipcode: "12926-3874"
+            },
+            id: 2,
+            email: "morrison@gmail.com",
+            username: "mor_2314",
+            name: { firstname: "david", lastname: "morrison" },
+            phone: "1-570-236-7033"
+          }
+        ], null, 2),
         error: null,
       });
     } else {
