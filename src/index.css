@@ -22,3 +22,31 @@
     overflow: hidden;
   }
 }
+
+/* Custom Prism Syntax Highlighting overrides */
+.token.property,
+.token.boolean,
+.token.function {
+  color: var(--accent-primary) !important;
+}
+
+.token.string,
+.token.attr-value {
+  color: var(--state-success) !important;
+}
+
+.token.number,
+.token.keyword,
+.token.class-name {
+  color: #fbbf24 !important;
+}
+
+.token.punctuation,
+.token.operator {
+  color: #a1a1aa !important;
+}
+
+.token.comment {
+  color: #52525b !important;
+}
+

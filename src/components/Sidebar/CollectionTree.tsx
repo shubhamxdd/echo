@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Collection, SavedRequest } from '../../types';
 import {
   Folder,
   FolderOpen,
-  FileCode,
-  Plus,
   Edit2,
   Trash2,
   ChevronDown,
   ChevronRight,
   FolderPlus,
   FilePlus,
+  Download,
 } from 'lucide-react';
 
 interface CollectionTreeProps {
@@ -22,6 +21,7 @@ interface CollectionTreeProps {
   onRenameFolder: (id: string, currentName: string) => void;
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
+  onExportFolder: (id: string) => void;
 }
 
 export function CollectionTree({
@@ -33,6 +33,7 @@ export function CollectionTree({
   onRenameFolder,
   onDeleteFolder,
   onDeleteRequest,
+  onExportFolder,
 }: CollectionTreeProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -98,6 +99,13 @@ export function CollectionTree({
               title="New sub-collection"
             >
               <FolderPlus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => onExportFolder(col.id)}
+              className="text-zinc-500 hover:text-violet-400 p-0.5 rounded hover:bg-zinc-800"
+              title="Export collection"
+            >
+              <Download className="w-3 h-3" />
             </button>
             <button
               onClick={() => onRenameFolder(col.id, col.name)}

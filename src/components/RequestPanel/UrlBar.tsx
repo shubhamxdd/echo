@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Send, Save, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { Send, Save } from 'lucide-react';
 
 interface UrlBarProps {
   method: string;

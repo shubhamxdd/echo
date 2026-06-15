@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Collection, SavedRequest, HistoryItem } from '../../types';
 import { CollectionTree } from './CollectionTree';
 import { HistoryList } from './HistoryList';
-import { FolderPlus, Search, ListFilter, History, FolderOpen } from 'lucide-react';
+import { FolderPlus, Search, History, FolderOpen, Upload, HelpCircle } from 'lucide-react';
 
 interface SidebarProps {
   collections: Collection[];
@@ -18,6 +18,9 @@ interface SidebarProps {
   onRenameFolder: (id: string, currentName: string) => void;
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
+  onExportFolder: (id: string) => void;
+  onImportCollection: (data: any) => void;
+  onHelpClick: () => void;
 }
 
 export function Sidebar({
@@ -34,6 +37,9 @@ export function Sidebar({
   onRenameFolder,
   onDeleteFolder,
   onDeleteRequest,
+  onExportFolder,
+  onImportCollection,
+  onHelpClick,
 }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<'collections' | 'history'>('collections');
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,11 +68,12 @@ export function Sidebar({
         const colMatches = col.name.toLowerCase().includes(lowerQuery);
 
         if (colMatches || filteredChildren.length > 0 || filteredRequests.length > 0) {
-          return {
+          const matchedCol: Collection = {
             ...col,
             children: filteredChildren,
             requests: filteredRequests,
           };
+          return matchedCol;
         }
         return null;
       })
@@ -98,13 +105,53 @@ export function Sidebar({
           </div>
           <span className="font-semibold text-xs tracking-wide text-zinc-100">RestDesk</span>
         </div>
-        <button
-          onClick={onCreateCollectionClick}
-          className="text-zinc-400 hover:text-violet-400 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
-          title="Create new collection"
-        >
-          <FolderPlus className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Help Button */}
+          <button
+            onClick={onHelpClick}
+            className="text-zinc-400 hover:text-violet-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
+            title="Keyboard Shortcuts (?)"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+
+          {/* Import Button */}
+          <label
+            className="text-zinc-400 hover:text-violet-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors cursor-pointer"
+            title="Import collection"
+          >
+            <Upload className="w-4 h-4" />
+            <input
+              type="file"
+              accept=".json"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  try {
+                    const parsed = JSON.parse(event.target?.result as string);
+                    onImportCollection(parsed);
+                  } catch (err) {
+                    alert('Invalid JSON file');
+                  }
+                };
+                reader.readAsText(file);
+                e.target.value = ''; // Reset
+              }}
+              className="hidden"
+            />
+          </label>
+
+          {/* Create Collection */}
+          <button
+            onClick={onCreateCollectionClick}
+            className="text-zinc-400 hover:text-violet-400 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
+            title="Create new collection"
+          >
+            <FolderPlus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Tabs Selector */}
@@ -159,6 +206,7 @@ export function Sidebar({
             onRenameFolder={onRenameFolder}
             onDeleteFolder={onDeleteFolder}
             onDeleteRequest={onDeleteRequest}
+            onExportFolder={onExportFolder}
           />
         ) : (
           <HistoryList

@@ -1,6 +1,5 @@
-import React from 'react';
 import { HistoryItem } from '../../types';
-import { Trash2, Clock, Globe } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface HistoryListProps {
   historyItems: HistoryItem[];

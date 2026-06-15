@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { KeyValueItem } from '../../types';
 import { Trash2, Plus } from 'lucide-react';
 

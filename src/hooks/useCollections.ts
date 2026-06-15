@@ -220,6 +220,106 @@ export function useCollections() {
     }
   };
 
+  const getCollectionExportData = async (colId: string): Promise<any> => {
+    try {
+      const db = await getDb();
+      
+      const loadNode = async (id: string): Promise<any> => {
+        const colRows = (await db.select('SELECT * FROM collections WHERE id = ?', [id])) as any[];
+        if (colRows.length === 0) return null;
+        const col = colRows[0];
+        
+        const reqRows = (await db.select('SELECT * FROM requests WHERE collection_id = ?', [id])) as any[];
+        const requests = reqRows.map((r) => ({
+          name: r.name,
+          method: r.method,
+          url: r.url,
+          headers: JSON.parse(r.headers || '[]'),
+          params: JSON.parse(r.params || '[]'),
+          body_type: r.body_type,
+          body: r.body || '',
+          auth_type: r.auth_type || 'none',
+          auth_data: JSON.parse(r.auth_data || '{}'),
+        }));
+        
+        const childRows = (await db.select('SELECT id FROM collections WHERE parent_id = ?', [id])) as any[];
+        const children = [];
+        for (const child of childRows) {
+          const childNode = await loadNode(child.id);
+          if (childNode) {
+            children.push(childNode);
+          }
+        }
+        
+        return {
+          name: col.name,
+          description: col.description || null,
+          requests,
+          children,
+        };
+      };
+      
+      return await loadNode(colId);
+    } catch (error) {
+      console.error('Failed to export collection data:', error);
+      throw error;
+    }
+  };
+
+  const importCollection = async (exportData: any, parentId: string | null = null): Promise<void> => {
+    try {
+      const db = await getDb();
+      const now = Date.now();
+      
+      const importNode = async (node: any, parentColId: string | null) => {
+        const colId = crypto.randomUUID();
+        
+        await db.execute(
+          `INSERT INTO collections (id, name, description, parent_id, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [colId, node.name || 'Imported Collection', node.description || null, parentColId, now, now]
+        );
+        
+        if (Array.isArray(node.requests)) {
+          for (const req of node.requests) {
+            const reqId = crypto.randomUUID();
+            await db.execute(
+              `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                reqId,
+                colId,
+                req.name || 'Request',
+                req.method || 'GET',
+                req.url || '',
+                JSON.stringify(req.headers || []),
+                JSON.stringify(req.params || []),
+                req.body_type || 'none',
+                req.body || '',
+                req.auth_type || 'none',
+                JSON.stringify(req.auth_data || {}),
+                now,
+                now,
+              ]
+            );
+          }
+        }
+        
+        if (Array.isArray(node.children)) {
+          for (const child of node.children) {
+            await importNode(child, colId);
+          }
+        }
+      };
+      
+      await importNode(exportData, parentId);
+      await loadCollections();
+    } catch (error) {
+      console.error('Failed to import collection:', error);
+      throw error;
+    }
+  };
+
   return {
     collections,
     loading,
@@ -229,5 +329,7 @@ export function useCollections() {
     deleteCollection,
     saveRequest,
     deleteRequest,
+    getCollectionExportData,
+    importCollection,
   };
 }
