@@ -89,6 +89,41 @@ export function JsonViewer({ body }: JsonViewerProps) {
     return filterJsonObject(parsedJson, searchQuery.trim()) || {};
   }, [parsedJson, searchQuery]);
 
+  // Calculate match counts for raw view text search
+  const matchCount = useMemo(() => {
+    if (!searchQuery.trim() || !body) return 0;
+    const term = searchQuery.trim().toLowerCase();
+    let count = 0;
+    let pos = body.toLowerCase().indexOf(term);
+    while (pos !== -1) {
+      count++;
+      pos = body.toLowerCase().indexOf(term, pos + term.length);
+    }
+    return count;
+  }, [body, searchQuery]);
+
+  // Highlight matches in raw view text search
+  const highlightedRaw = useMemo(() => {
+    if (!searchQuery.trim() || viewMode !== 'raw' || !body) return body;
+    const term = searchQuery.trim();
+    const escapedTerm = term.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const parts = body.split(new RegExp(`(${escapedTerm})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) => {
+          const isMatch = part.toLowerCase() === term.toLowerCase();
+          return isMatch ? (
+            <mark key={i} className="bg-orange-500/30 text-orange-300 border border-orange-500/20 rounded-sm px-0.5 font-bold">
+              {part}
+            </mark>
+          ) : (
+            part
+          );
+        })}
+      </>
+    );
+  }, [body, searchQuery, viewMode]);
+
   const handleCopyAll = () => {
     navigator.clipboard.writeText(body);
     setCopied(true);
@@ -107,7 +142,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors select-none ${
                   viewMode === 'pretty'
                     ? 'bg-orange-500/15 text-orange-300 font-medium'
-                    : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-zinc-300'
+                    : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-zinc-350'
                 }`}
               >
                 <FileJson className="w-3.5 h-3.5" />
@@ -119,7 +154,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors select-none ${
                 viewMode === 'raw'
                   ? 'bg-orange-500/15 text-orange-300 font-medium'
-                  : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-555 hover:text-zinc-300'
+                  : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-555 hover:text-zinc-350'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -127,17 +162,24 @@ export function JsonViewer({ body }: JsonViewerProps) {
             </button>
           </div>
 
-          {/* Search box */}
-          {isJson && viewMode === 'pretty' && (
-            <div className="relative flex items-center">
-              <Search className="absolute left-2.5 w-3 h-3 text-zinc-600" />
-              <input
-                type="text"
-                placeholder="Filter JSON tree..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-zinc-950 border border-zinc-850 focus:border-orange-500/70 focus:outline-none rounded py-1 pl-8 pr-3 text-[10px] text-zinc-300 placeholder-zinc-700 transition-colors w-40 font-mono"
-              />
+          {/* Search box (available for pretty JSON and raw text) */}
+          {body && (
+            <div className="relative flex items-center gap-2">
+              <div className="relative flex items-center">
+                <Search className="absolute left-2.5 w-3 h-3 text-zinc-650" />
+                <input
+                  type="text"
+                  placeholder={viewMode === 'pretty' ? "Filter JSON tree..." : "Search text..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-850 focus:border-orange-500/70 focus:outline-none rounded py-1 pl-8 pr-3 text-[10px] text-zinc-350 placeholder-zinc-750 transition-colors w-40 font-mono"
+                />
+              </div>
+              {viewMode === 'raw' && searchQuery.trim() !== '' && (
+                <span className="text-[9px] bg-zinc-905 border border-zinc-800 text-orange-400 px-1.5 py-0.5 rounded font-mono font-semibold shrink-0">
+                  {matchCount} matches
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -145,7 +187,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
         {body && (
           <button
             onClick={handleCopyAll}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-400 hover:text-zinc-200 transition-all select-none"
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-450 hover:text-zinc-200 transition-all select-none"
             title="Copy entire response body"
           >
             {copied ? (
@@ -186,8 +228,8 @@ export function JsonViewer({ body }: JsonViewerProps) {
             />
           </div>
         ) : (
-          <pre className="text-zinc-300 whitespace-pre-wrap break-all leading-relaxed font-mono select-all">
-            {body}
+          <pre className="text-zinc-300 whitespace-pre-wrap break-all leading-relaxed font-mono select-text">
+            {highlightedRaw}
           </pre>
         )}
       </div>

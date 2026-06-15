@@ -92,20 +92,7 @@ export function Sidebar({
       .filter((c): c is Collection => c !== null);
   };
 
-  // Filtering helper for History
-  const filterHistory = (items: HistoryItem[], query: string): HistoryItem[] => {
-    if (!query) return items;
-    const lowerQuery = query.toLowerCase();
-    return items.filter(
-      (item) =>
-        item.url.toLowerCase().includes(lowerQuery) ||
-        item.method.toLowerCase().includes(lowerQuery) ||
-        (item.status_code && String(item.status_code).includes(lowerQuery))
-    );
-  };
-
   const filteredCollections = filterCollections(collections, searchQuery);
-  const filteredHistory = filterHistory(historyItems, searchQuery);
 
   return (
     <div className="w-full bg-zinc-900 flex flex-col h-full overflow-hidden">
@@ -203,19 +190,21 @@ export function Sidebar({
         </button>
       </div>
 
-      {/* Search Input */}
-      <div className="px-3 py-2">
-        <div className="relative flex items-center">
-          <Search className="absolute left-2.5 w-3.5 h-3.5 text-zinc-650" />
-          <input
-            type="text"
-            placeholder={activeTab === 'collections' ? 'Filter collections...' : 'Filter history...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
-          />
+      {/* Search Input (only for collections tab) */}
+      {activeTab === 'collections' && (
+        <div className="px-3 py-2">
+          <div className="relative flex items-center">
+            <Search className="absolute left-2.5 w-3.5 h-3.5 text-zinc-650" />
+            <input
+              type="text"
+              placeholder="Filter collections..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Scrollable Tree/List Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 pb-4">
@@ -237,7 +226,7 @@ export function Sidebar({
           />
         ) : (
           <HistoryList
-            historyItems={filteredHistory}
+            historyItems={historyItems}
             onItemSelect={onHistorySelect}
             onDeleteItem={onDeleteHistoryItem}
             onClearHistory={onClearHistory}
