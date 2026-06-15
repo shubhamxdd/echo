@@ -25,7 +25,7 @@
   - `useHistory.ts` (handles logging requests and pruning to 500 entries).
   - `useEnvironments.ts` (handles CRUD for variables/environments).
 - `src/lib/` — Shared libraries including `db.ts` (SQLite connection initialization, table migration, and raw query wrappers).
-- `src-tauri/` — Rust Tauri configuration, backend plugins declaration (SQL, HTTP), permissions settings, and app bundling configurations.
+- `src-tauri/` — Rust Tauri configuration, backend plugins declaration (SQL, HTTP), permissions settings, app bundling configurations, and custom commands (like native file saving via the `rfd` crate).
 
 ## Storage Model
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { RequestPanel } from './components/RequestPanel/RequestPanel';
 import { ResponsePanel } from './components/ResponsePanel/ResponsePanel';
@@ -1220,16 +1221,15 @@ function App() {
       if (!exportData) return;
 
       const postmanData = translateEchoToPostman(exportData);
+      const content = JSON.stringify(postmanData, null, 2);
+      const defaultName = `${exportData.name || 'collection'}.postman_collection.json`;
 
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(postmanData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `${exportData.name || 'collection'}.postman_collection.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      await invoke('save_file', { content, defaultName });
     } catch (e) {
-      console.error('Failed to export Postman collection:', e);
+      if (e !== 'cancelled') {
+        console.error('Failed to export Postman collection:', e);
+        await showAlert(`Failed to export Postman collection: ${e}`, 'Export Failed');
+      }
     }
   };
 
@@ -1239,15 +1239,15 @@ function App() {
       const exportData = await getCollectionExportData(colId);
       if (!exportData) return;
 
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `${exportData.name || 'collection'}-export.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      const content = JSON.stringify(exportData, null, 2);
+      const defaultName = `${exportData.name || 'collection'}-export.json`;
+
+      await invoke('save_file', { content, defaultName });
     } catch (e) {
-      console.error('Failed to export collection:', e);
+      if (e !== 'cancelled') {
+        console.error('Failed to export collection:', e);
+        await showAlert(`Failed to export collection: ${e}`, 'Export Failed');
+      }
     }
   };
 
