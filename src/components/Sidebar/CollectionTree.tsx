@@ -10,6 +10,7 @@ import {
   FolderPlus,
   FilePlus,
   Download,
+  FolderInput,
 } from 'lucide-react';
 
 interface CollectionTreeProps {
@@ -22,6 +23,7 @@ interface CollectionTreeProps {
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
+  onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
 }
 
 export function CollectionTree({
@@ -34,6 +36,7 @@ export function CollectionTree({
   onDeleteFolder,
   onDeleteRequest,
   onExportFolder,
+  onMoveRequest,
 }: CollectionTreeProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -86,41 +89,65 @@ export function CollectionTree({
 
           {/* Quick Actions (visible on hover) */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => onCreateRequest(col.id)}
-              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
-              title="Add request"
-            >
-              <FilePlus className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onCreateSubfolder(col.id)}
-              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
-              title="New sub-collection"
-            >
-              <FolderPlus className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onExportFolder(col.id)}
-              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
-              title="Export collection"
-            >
-              <Download className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onRenameFolder(col.id, col.name)}
-              className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded hover:bg-zinc-800"
-              title="Rename folder"
-            >
-              <Edit2 className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onDeleteFolder(col.id)}
-              className="text-zinc-500 hover:text-red-400 p-0.5 rounded hover:bg-zinc-800"
-              title="Delete folder"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => onCreateRequest(col.id)}
+                className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
+              >
+                <FilePlus className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                Add request
+              </span>
+            </div>
+
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => onCreateSubfolder(col.id)}
+                className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
+              >
+                <FolderPlus className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                New sub-collection
+              </span>
+            </div>
+
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => onExportFolder(col.id)}
+                className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
+              >
+                <Download className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                Export collection
+              </span>
+            </div>
+
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => onRenameFolder(col.id, col.name)}
+                className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                Rename folder
+              </span>
+            </div>
+
+            <div className="relative group/tooltip">
+              <button
+                onClick={() => onDeleteFolder(col.id)}
+                className="text-zinc-500 hover:text-red-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                Delete folder
+              </span>
+            </div>
           </div>
         </div>
 
@@ -152,18 +179,34 @@ export function CollectionTree({
                       <span className="text-xs truncate">{req.name}</span>
                     </div>
 
-                    {/* Request Delete Action */}
+                    {/* Request Actions */}
                     <div
-                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex items-center gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        onClick={() => onDeleteRequest(req.id)}
-                        className="text-zinc-500 hover:text-red-400 p-0.5 rounded hover:bg-zinc-800"
-                        title="Delete request"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
+                      <div className="relative group/tooltip">
+                        <button
+                          onClick={() => onMoveRequest?.(req.id, req.collection_id)}
+                          className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer flex items-center justify-center"
+                        >
+                          <FolderInput className="w-3 h-3" />
+                        </button>
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                          Move Request
+                        </span>
+                      </div>
+
+                      <div className="relative group/tooltip">
+                        <button
+                          onClick={() => onDeleteRequest(req.id)}
+                          className="text-zinc-500 hover:text-red-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer flex items-center justify-center"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                          Delete Request
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
