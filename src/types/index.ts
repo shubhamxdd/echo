@@ -44,6 +44,7 @@ export interface SavedRequest {
     apikey_addTo?: 'header' | 'query';
   };
   assertions?: AssertionItem[];
+  response?: HttpResponse | null;
   created_at: number;
   updated_at: number;
 }
@@ -69,6 +70,7 @@ export interface HttpResponse {
   headers: KeyValueItem[];
   body: string;
   error: string | null;
+  isSaved?: boolean;
 }
 
 export interface Environment {

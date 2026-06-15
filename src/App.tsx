@@ -580,6 +580,7 @@ function App() {
     }
 
     const newTabId = crypto.randomUUID();
+    const savedResponse = req.response ? { ...req.response, isSaved: true } : null;
     const newTab: RequestTab = {
       id: newTabId,
       savedRequestId: req.id,
@@ -593,7 +594,7 @@ function App() {
       body: req.body,
       authType: req.auth_type,
       authData: req.auth_data || {},
-      activeResponse: null,
+      activeResponse: savedResponse,
     };
 
     setTabs((prev) => [...prev, newTab]);
@@ -611,7 +612,7 @@ function App() {
       collectionId: req.collection_id,
       name: req.name,
     });
-    setActiveResponse(null);
+    setActiveResponse(savedResponse);
     setActiveTabId(newTabId);
   };
 
@@ -768,7 +769,6 @@ function App() {
     }
   };
 
-  // 12. Save request launcher
   const handleSaveLaunch = () => {
     if (activeRequestMeta.id) {
       saveRequest({
@@ -783,7 +783,20 @@ function App() {
         body,
         auth_type: authType,
         auth_data: authData,
+        response: activeResponse,
       });
+      if (activeResponse) {
+        const savedRes = { ...activeResponse, isSaved: true };
+        setActiveResponse(savedRes);
+        setTabs((prev) =>
+          prev.map((t) => {
+            if (t.id === activeTabId) {
+              return { ...t, activeResponse: savedRes };
+            }
+            return t;
+          })
+        );
+      }
     } else {
       setSaveReqName(url ? url.replace(/^https?:\/\//i, '').substring(0, 30) : 'New Request');
       const flat = flattenCollections(collections);
@@ -804,6 +817,8 @@ function App() {
     const cleanedHeaders = headers.filter((h) => h.key.trim() !== '');
     const cleanedParams = params.filter((p) => p.key.trim() !== '');
 
+    const savedRes = activeResponse ? { ...activeResponse, isSaved: true } : null;
+
     await saveRequest({
       id: newId,
       collection_id: saveReqCollectionId,
@@ -816,6 +831,7 @@ function App() {
       body,
       auth_type: authType,
       auth_data: authData,
+      response: activeResponse,
     });
 
     setActiveRequestMeta({
@@ -823,6 +839,24 @@ function App() {
       collectionId: saveReqCollectionId,
       name: saveReqName.trim(),
     });
+
+    if (savedRes) {
+      setActiveResponse(savedRes);
+    }
+
+    setTabs((prev) =>
+      prev.map((t) => {
+        if (t.id === activeTabId) {
+          return {
+            ...t,
+            savedRequestId: newId,
+            name: saveReqName.trim(),
+            activeResponse: savedRes,
+          };
+        }
+        return t;
+      })
+    );
 
     setSaveReqModalOpen(false);
   };

@@ -34,6 +34,14 @@ export function useCollections() {
         body: r.body || '',
         auth_type: r.auth_type || 'none',
         auth_data: JSON.parse(r.auth_data || '{}'),
+        response: r.response_status ? {
+          status: r.response_status,
+          statusText: r.response_status_text || '',
+          duration_ms: r.response_duration_ms || 0,
+          headers: JSON.parse(r.response_headers || '[]'),
+          body: r.response_body || '',
+          error: r.response_error || null,
+        } : null,
         created_at: r.created_at,
         updated_at: r.updated_at,
       }));
@@ -162,7 +170,9 @@ export function useCollections() {
         // Update
         await db.execute(
           `UPDATE requests 
-           SET collection_id = ?, name = ?, method = ?, url = ?, headers = ?, params = ?, body_type = ?, body = ?, auth_type = ?, auth_data = ?, updated_at = ?
+           SET collection_id = ?, name = ?, method = ?, url = ?, headers = ?, params = ?, body_type = ?, body = ?, auth_type = ?, auth_data = ?, 
+               response_status = ?, response_status_text = ?, response_duration_ms = ?, response_headers = ?, response_body = ?, response_error = ?,
+               updated_at = ?
            WHERE id = ?`,
           [
             request.collection_id,
@@ -175,6 +185,12 @@ export function useCollections() {
             request.body,
             request.auth_type,
             JSON.stringify(request.auth_data),
+            request.response ? request.response.status : null,
+            request.response ? request.response.statusText : null,
+            request.response ? request.response.duration_ms : null,
+            request.response ? JSON.stringify(request.response.headers) : null,
+            request.response ? request.response.body : null,
+            request.response ? request.response.error : null,
             now,
             request.id,
           ]
@@ -182,8 +198,10 @@ export function useCollections() {
       } else {
         // Insert
         await db.execute(
-          `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, 
+                                 response_status, response_status_text, response_duration_ms, response_headers, response_body, response_error,
+                                 created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             request.id,
             request.collection_id,
@@ -196,6 +214,12 @@ export function useCollections() {
             request.body,
             request.auth_type,
             JSON.stringify(request.auth_data),
+            request.response ? request.response.status : null,
+            request.response ? request.response.statusText : null,
+            request.response ? request.response.duration_ms : null,
+            request.response ? JSON.stringify(request.response.headers) : null,
+            request.response ? request.response.body : null,
+            request.response ? request.response.error : null,
             now,
             now,
           ]
@@ -240,6 +264,14 @@ export function useCollections() {
           body: r.body || '',
           auth_type: r.auth_type || 'none',
           auth_data: JSON.parse(r.auth_data || '{}'),
+          response: r.response_status ? {
+            status: r.response_status,
+            statusText: r.response_status_text || '',
+            duration_ms: r.response_duration_ms || 0,
+            headers: JSON.parse(r.response_headers || '[]'),
+            body: r.response_body || '',
+            error: r.response_error || null,
+          } : null,
         }));
         
         const childRows = (await db.select('SELECT id FROM collections WHERE parent_id = ?', [id])) as any[];
@@ -284,8 +316,10 @@ export function useCollections() {
           for (const req of node.requests) {
             const reqId = crypto.randomUUID();
             await db.execute(
-              `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, 
+                                     response_status, response_status_text, response_duration_ms, response_headers, response_body, response_error,
+                                     created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 reqId,
                 colId,
@@ -298,6 +332,12 @@ export function useCollections() {
                 req.body || '',
                 req.auth_type || 'none',
                 JSON.stringify(req.auth_data || {}),
+                req.response ? req.response.status : null,
+                req.response ? req.response.statusText : null,
+                req.response ? req.response.duration_ms : null,
+                req.response ? JSON.stringify(req.response.headers) : null,
+                req.response ? req.response.body : null,
+                req.response ? req.response.error : null,
                 now,
                 now,
               ]
@@ -346,8 +386,10 @@ export function useCollections() {
 
       const newReqId = crypto.randomUUID();
       await db.execute(
-        `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, 
+                               response_status, response_status_text, response_duration_ms, response_headers, response_body, response_error,
+                               created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newReqId,
           req.collection_id,
@@ -360,6 +402,12 @@ export function useCollections() {
           req.body,
           req.auth_type,
           req.auth_data,
+          req.response_status,
+          req.response_status_text,
+          req.response_duration_ms,
+          req.response_headers,
+          req.response_body,
+          req.response_error,
           now,
           now,
         ]
@@ -393,8 +441,10 @@ export function useCollections() {
         for (const req of reqs) {
           const newReqId = crypto.randomUUID();
           await db.execute(
-            `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO requests (id, collection_id, name, method, url, headers, params, body_type, body, auth_type, auth_data, 
+                                   response_status, response_status_text, response_duration_ms, response_headers, response_body, response_error,
+                                   created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               newReqId,
               newColId,
@@ -407,6 +457,12 @@ export function useCollections() {
               req.body,
               req.auth_type,
               req.auth_data,
+              req.response_status,
+              req.response_status_text,
+              req.response_duration_ms,
+              req.response_headers,
+              req.response_body,
+              req.response_error,
               now,
               now,
             ]

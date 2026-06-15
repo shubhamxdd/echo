@@ -55,6 +55,26 @@ export async function initDb(): Promise<void> {
       // Column already exists, ignore
     }
 
+    // Migration: Add response cache columns to requests table if they don't exist
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_status INTEGER;');
+    } catch (_) {}
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_status_text TEXT;');
+    } catch (_) {}
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_duration_ms INTEGER;');
+    } catch (_) {}
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_headers TEXT;');
+    } catch (_) {}
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_body TEXT;');
+    } catch (_) {}
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN response_error TEXT;');
+    } catch (_) {}
+
     // 3. Create history table
     await db.execute(`
       CREATE TABLE IF NOT EXISTS history (

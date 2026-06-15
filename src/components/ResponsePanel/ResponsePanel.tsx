@@ -23,6 +23,12 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
         <div className="flex items-center gap-1.5">
           <Terminal className="w-4 h-4 text-orange-400" />
           <h2 className="text-xs font-semibold text-zinc-150 uppercase tracking-wider">Response</h2>
+          {response?.isSaved && (
+            <span className="ml-2 px-2 py-0.5 bg-orange-950/20 border border-orange-500/30 text-[10px] font-semibold text-orange-400 rounded-full select-none tracking-normal normal-case flex items-center gap-1">
+              <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
+              Saved Output
+            </span>
+          )}
         </div>
         
         {response && !loading && (
