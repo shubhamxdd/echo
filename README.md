@@ -34,7 +34,8 @@ Here is a guide on how to operate Echo and where to find key features:
   * **Drag and Drop**: [TODO] A nested drag-and-drop mechanism to reorganize requests directly within collection folders is planned for a future update.
   * **Onboarding Walkthrough**: Click the **Compass** icon in the sidebar header to launch the interactive step-by-step UI Tour. The walkthrough automatically seeds your workspace with live, real-world mock user data fetched from the public `https://fakestoreapi.com/users` API.
 * **History Tab**: Automatically records every request executed. Click any history item to reload its full request parameters and response details.
-* **Sidebar Collapse**: Click the arrow (`<` or `>`) at the top of the sidebar to collapse it, maximizing your coding real estate.
+  * **History Search & Filter**: Includes a built-in search bar to filter past logs by URL/status, alongside quick-filter method pills (`ALL`, `GET`, `POST`, `PUT`, `DELETE`) to instantly narrow down requests.
+* **Sidebar Resize & Collapse**: Both Left and Right sidebars are fully resizable! Click and drag their outer boundaries horizontally. Sidebar widths are automatically saved to `localStorage`. You can collapse sidebars entirely to maximize workspace layout.
 
 ### 2. The Workspace (Multi-Tabs)
 * **Tab Strip**: Located below the Top Bar. Work on multiple requests in parallel. Double-click tabs to switch, and click `×` to close.
@@ -51,6 +52,7 @@ Here is a guide on how to operate Echo and where to find key features:
 * **Panel Resizer**: The horizontal bar dividing the Request and Response sections is fully draggable! Click and drag it up or down to adjust panel heights.
 * **Cancel Request**: If an API request is taking too long or hanging, the **Send** button changes to a red **Cancel** button. Click it to abort the network request immediately.
 * **Response View**: Shows the status code, response time (ms), headers, and a formatted JSON viewer with syntax highlighting.
+  * **Response Search**: Find values easily. In `Pretty JSON` view, the search input filters the JSON tree keys/values; in `Raw Text` view, it highlights match occurrences in orange and shows a total match count.
 
 ### 5. Environments Manager (Top Right)
 * **Dropdown**: Click the **Env** selector in the Top Bar.
@@ -63,7 +65,14 @@ Here is a guide on how to operate Echo and where to find key features:
 ### 7. Collapsible AI Assistant (Right Sidebar)
 * **AI Chatbot**: Click the **Sparkles** icon in the Top Header Bar to toggle the context-aware AI chatbot assistant.
 * **Context Integration**: The chatbot automatically analyzes the active request parameters, environment variables, headers, and response payloads to help you generate assertions, write integration code snippets, explain payload schemas, and diagnose errors.
+* **Rename Chat Sessions**: Click the edit/pencil icon next to the active chat thread dropdown to rename any chat thread inline.
+* **GFM Markdown & Code Copying**: AI responses are rendered using rich Markdown (via `react-markdown` and `remark-gfm`). Tables, lists, and headers format cleanly. Code blocks contain syntax labels and quick Copy buttons.
 * **Multi-Provider Support**: Supports multiple AI engines including Google Gemini, OpenAI, OpenRouter (accessing Claude, Llama, and more), or custom OpenAI-compatible local/remote endpoints (such as local Ollama instances). API keys and endpoints are managed securely and separately per-provider. Includes quick-trigger command macro buttons.
+
+---
+
+## 🎨 Premium Dialog Modals
+Echo uses a custom designed alert and confirm modal overlay system that matches the dark slate developer aesthetic, replacing all ugly browser-native confirm and alert popups.
 
 ---
 
