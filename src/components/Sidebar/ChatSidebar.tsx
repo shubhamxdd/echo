@@ -11,6 +11,7 @@ import {
   Key,
   ExternalLink,
   RefreshCw,
+  Edit2,
 } from 'lucide-react';
 
 interface ChatSidebarProps {
@@ -113,8 +114,11 @@ export function ChatSidebar({
   // Multi-Chat Sessions State
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>('');
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const [editTitleValue, setEditTitleValue] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const preventSaveRef = useRef<boolean>(false);
 
   // Derived Active Session Details
   const activeSession = sessions.find((s) => s.id === activeSessionId);
@@ -227,6 +231,33 @@ export function ChatSidebar({
   };
 
   // Multi-Chat Helper Actions
+  const handleStartRename = () => {
+    if (activeSession) {
+      preventSaveRef.current = false;
+      setEditTitleValue(activeSession.title);
+      setIsEditingTitle(true);
+    }
+  };
+
+  const handleSaveTitle = () => {
+    if (!editTitleValue.trim()) {
+      setIsEditingTitle(false);
+      return;
+    }
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id === activeSessionId) {
+          return {
+            ...s,
+            title: editTitleValue.trim(),
+          };
+        }
+        return s;
+      })
+    );
+    setIsEditingTitle(false);
+  };
+
   const handleCreateSession = () => {
     const newId = crypto.randomUUID();
     const newSession: ChatSession = {
@@ -557,24 +588,60 @@ export function ChatSidebar({
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
         <div className="flex items-center gap-1.5 overflow-hidden flex-1 mr-2">
           <Sparkles className="w-4 h-4 text-orange-500 shrink-0" />
-          <select
-            value={activeSessionId}
-            onChange={(e) => {
-              setActiveSessionId(e.target.value);
-              setErrorMsg(null);
-            }}
-            className="bg-transparent text-[11px] text-zinc-100 border-none outline-none focus:ring-0 truncate cursor-pointer font-semibold py-0.5 max-w-[140px]"
-            title="Switch Chat Session"
-          >
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id} className="bg-zinc-900 text-zinc-350">
-                {s.title}
-              </option>
-            ))}
-          </select>
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={editTitleValue}
+              onChange={(e) => setEditTitleValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveTitle();
+                } else if (e.key === 'Escape') {
+                  preventSaveRef.current = true;
+                  setIsEditingTitle(false);
+                  setTimeout(() => {
+                    preventSaveRef.current = false;
+                  }, 100);
+                }
+              }}
+              onBlur={() => {
+                if (!preventSaveRef.current) {
+                  handleSaveTitle();
+                }
+              }}
+              className="bg-zinc-950 text-[11px] text-zinc-100 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded px-1.5 py-0.5 w-full max-w-[110px]"
+              autoFocus
+            />
+          ) : (
+            <>
+              <select
+                value={activeSessionId}
+                onChange={(e) => {
+                  setActiveSessionId(e.target.value);
+                  setErrorMsg(null);
+                  setIsEditingTitle(false);
+                }}
+                className="bg-transparent text-[11px] text-zinc-100 border-none outline-none focus:ring-0 truncate cursor-pointer font-semibold py-0.5 max-w-[110px]"
+                title="Switch Chat Session"
+              >
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id} className="bg-zinc-900 text-zinc-350">
+                    {s.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleStartRename}
+                className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors shrink-0"
+                title="Rename Chat Session"
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            </>
+          )}
           <button
             onClick={handleCreateSession}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 cursor-pointer transition-colors"
+            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 cursor-pointer transition-colors shrink-0"
             title="New Chat Session"
           >
             <span className="text-xs font-bold font-mono text-zinc-400 hover:text-orange-400">+</span>

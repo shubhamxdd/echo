@@ -106,7 +106,7 @@ export function Sidebar({
   const filteredHistory = filterHistory(historyItems, searchQuery);
 
   return (
-    <div className="w-[280px] bg-zinc-900 border-r border-zinc-800 flex flex-col h-full overflow-hidden">
+    <div className="w-full bg-zinc-900 flex flex-col h-full overflow-hidden">
       {/* Sidebar Header */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">

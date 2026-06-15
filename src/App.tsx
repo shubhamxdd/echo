@@ -175,6 +175,84 @@ function App() {
     };
   }, [isResizing, resize, stopResizing]);
 
+  // Left Sidebar Resizer State and Helpers
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('echo_sidebar_width');
+    return saved ? parseInt(saved, 10) : 280;
+  });
+  const [isResizingLeft, setIsResizingLeft] = useState(false);
+
+  const startResizingLeft = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingLeft(true);
+  }, []);
+
+  const stopResizingLeft = useCallback(() => {
+    setIsResizingLeft(false);
+  }, []);
+
+  const resizeLeft = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizingLeft) {
+      const newWidth = mouseMoveEvent.clientX;
+      const clampedWidth = Math.max(180, Math.min(500, newWidth));
+      setSidebarWidth(clampedWidth);
+    }
+  }, [isResizingLeft]);
+
+  useEffect(() => {
+    if (isResizingLeft) {
+      window.addEventListener('mousemove', resizeLeft);
+      window.addEventListener('mouseup', stopResizingLeft);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resizeLeft);
+      window.removeEventListener('mouseup', stopResizingLeft);
+    };
+  }, [isResizingLeft, resizeLeft, stopResizingLeft]);
+
+  useEffect(() => {
+    localStorage.setItem('echo_sidebar_width', sidebarWidth.toString());
+  }, [sidebarWidth]);
+
+  // Right Sidebar Resizer State and Helpers
+  const [chatSidebarWidth, setChatSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('echo_chat_sidebar_width');
+    return saved ? parseInt(saved, 10) : 320;
+  });
+  const [isResizingRight, setIsResizingRight] = useState(false);
+
+  const startResizingRight = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingRight(true);
+  }, []);
+
+  const stopResizingRight = useCallback(() => {
+    setIsResizingRight(false);
+  }, []);
+
+  const resizeRight = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizingRight) {
+      const newWidth = window.innerWidth - mouseMoveEvent.clientX;
+      const clampedWidth = Math.max(250, Math.min(600, newWidth));
+      setChatSidebarWidth(clampedWidth);
+    }
+  }, [isResizingRight]);
+
+  useEffect(() => {
+    if (isResizingRight) {
+      window.addEventListener('mousemove', resizeRight);
+      window.addEventListener('mouseup', stopResizingRight);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resizeRight);
+      window.removeEventListener('mouseup', stopResizingRight);
+    };
+  }, [isResizingRight, resizeRight, stopResizingRight]);
+
+  useEffect(() => {
+    localStorage.setItem('echo_chat_sidebar_width', chatSidebarWidth.toString());
+  }, [chatSidebarWidth]);
+
   // Guided Tour Workspace Simulation State
   const workspaceStateRef = useRef({
     method: 'GET',
@@ -982,13 +1060,16 @@ function App() {
       created_at: Date.now(),
       updated_at: Date.now(),
     });
-  };
-
-  return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans">
+  };  return (
+    <div className={`flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans ${(isResizing || isResizingLeft || isResizingRight) ? 'select-none' : ''}`}>
       {/* 1. Left Sidebar */}
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[280px]'} h-full shrink-0 flex overflow-hidden border-r border-zinc-800/80`}>
-        <div id="tour-sidebar" className="w-[280px] h-full flex flex-col shrink-0">
+      <div 
+        className={`h-full shrink-0 flex overflow-hidden border-r border-zinc-800/80 ${
+          sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : ''
+        } ${isResizingLeft ? '' : 'transition-[width,opacity] duration-300'}`}
+        style={{ width: sidebarCollapsed ? 0 : `${sidebarWidth}px` }}
+      >
+        <div id="tour-sidebar" className="w-full h-full flex flex-col shrink-0">
           <Sidebar
             collections={collections}
             historyItems={historyList}
@@ -1036,6 +1117,14 @@ function App() {
           />
         </div>
       </div>
+
+      {!sidebarCollapsed && (
+        <div
+          className="w-1 bg-zinc-900/60 hover:bg-orange-500 cursor-col-resize transition-colors shrink-0 border-r border-zinc-850"
+          onMouseDown={startResizingLeft}
+          title="Drag to resize left sidebar"
+        />
+      )}
 
       {/* 2. Main Workspace */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -1201,9 +1290,22 @@ function App() {
         </div>
       </div>
 
+      {!chatSidebarCollapsed && (
+        <div
+          className="w-1 bg-zinc-900/60 hover:bg-orange-500 cursor-col-resize transition-colors shrink-0 border-l border-zinc-850"
+          onMouseDown={startResizingRight}
+          title="Drag to resize AI chat sidebar"
+        />
+      )}
+
       {/* 3. Right Sidebar (AI Chatbot) */}
-      <div className={`transition-all duration-300 ${chatSidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[320px] border-l border-zinc-800/80'} h-full shrink-0 flex overflow-hidden`}>
-        <div className="w-[320px] h-full flex flex-col shrink-0">
+      <div 
+        className={`h-full shrink-0 flex overflow-hidden border-l border-zinc-800/80 ${
+          chatSidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : ''
+        } ${isResizingRight ? '' : 'transition-[width,opacity] duration-300'}`}
+        style={{ width: chatSidebarCollapsed ? 0 : `${chatSidebarWidth}px` }}
+      >
+        <div className="w-full h-full flex flex-col shrink-0">
           <ChatSidebar
             activeRequestMeta={activeRequestMeta}
             method={method}
