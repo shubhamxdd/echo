@@ -33,6 +33,7 @@ interface CollectionTreeProps {
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
+  onExportPostman?: (id: string) => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
   onMoveRequestDirect?: (requestId: string, targetCollectionId: string) => void;
   onDuplicateFolder?: (id: string) => void;
@@ -50,6 +51,7 @@ export function CollectionTree({
   onDeleteFolder,
   onDeleteRequest,
   onExportFolder,
+  onExportPostman,
   onMoveRequest,
   onDuplicateFolder,
   onDuplicateRequest,
@@ -140,6 +142,14 @@ export function CollectionTree({
                 >
                   <Download className="w-3.5 h-3.5 text-orange-500" />
                   <span>Export Collection</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => onExportPostman?.(col.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-orange-500" />
+                  <span>Export to Postman</span>
                 </DropdownMenuItem>
                 
                 <DropdownMenuItem

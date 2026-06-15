@@ -23,6 +23,7 @@ interface SidebarProps {
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
+  onExportPostman?: (id: string) => void;
   onImportCollection: (data: any) => void;
   onHelpClick: () => void;
   onTourClick?: () => void;
@@ -48,6 +49,7 @@ export function Sidebar({
   onDeleteFolder,
   onDeleteRequest,
   onExportFolder,
+  onExportPostman,
   onImportCollection,
   onHelpClick,
   onTourClick,
@@ -222,6 +224,7 @@ export function Sidebar({
             onDeleteFolder={onDeleteFolder}
             onDeleteRequest={onDeleteRequest}
             onExportFolder={onExportFolder}
+            onExportPostman={onExportPostman}
             onMoveRequest={onMoveRequest}
             onMoveRequestDirect={onMoveRequestDirect}
             onDuplicateFolder={onDuplicateFolder}

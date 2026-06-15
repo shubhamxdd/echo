@@ -1070,6 +1070,169 @@ function App() {
     }
   };
 
+  // Helper to translate Echo collection tree to Postman v2.1.0 format
+  const translateEchoToPostman = (node: any): any => {
+    const mapItem = (item: any): any => {
+      // If it's a collection/folder
+      if (item.requests !== undefined || item.children !== undefined) {
+        const items: any[] = [];
+        
+        // Add child collections
+        if (Array.isArray(item.children)) {
+          item.children.forEach((child: any) => {
+            items.push(mapItem(child));
+          });
+        }
+        
+        // Add requests
+        if (Array.isArray(item.requests)) {
+          item.requests.forEach((req: any) => {
+            items.push(mapItem(req));
+          });
+        }
+        
+        return {
+          name: item.name,
+          description: item.description || "",
+          item: items
+        };
+      }
+      
+      // If it's a request
+      const headers = Array.isArray(item.headers)
+        ? item.headers
+            .filter((h: any) => h.enabled && h.key)
+            .map((h: any) => ({
+              key: h.key,
+              value: h.value,
+              type: "text"
+            }))
+        : [];
+        
+      if (item.auth_type === 'bearer' && item.auth_data?.bearer_token) {
+        headers.push({
+          key: "Authorization",
+          value: `Bearer ${item.auth_data.bearer_token}`,
+          type: "text"
+        });
+      } else if (item.auth_type === 'basic') {
+        const username = item.auth_data?.basic_username || '';
+        const password = item.auth_data?.basic_password || '';
+        const encoded = btoa(`${username}:${password}`);
+        headers.push({
+          key: "Authorization",
+          value: `Basic ${encoded}`,
+          type: "text"
+        });
+      } else if (item.auth_type === 'apikey' && item.auth_data?.apikey_addTo === 'header' && item.auth_data?.apikey_key) {
+        headers.push({
+          key: item.auth_data.apikey_key,
+          value: item.auth_data.apikey_value || '',
+          type: "text"
+        });
+      }
+
+      let bodyInfo: any = null;
+      if (item.method !== 'GET' && item.method !== 'HEAD' && item.body_type && item.body_type !== 'none') {
+        if (item.body_type === 'raw' || item.body_type === 'json') {
+          bodyInfo = {
+            mode: "raw",
+            raw: item.body || "",
+            options: item.body_type === 'json' ? {
+              raw: {
+                language: "json"
+              }
+            } : undefined
+          };
+        } else if (item.body_type === 'form') {
+          try {
+            const formItems = JSON.parse(item.body) as any[];
+            bodyInfo = {
+              mode: "urlencoded",
+              urlencoded: formItems
+                .filter((x) => x.enabled && x.key)
+                .map((x) => ({
+                  key: x.key,
+                  value: x.value,
+                  description: "",
+                  type: "text"
+                }))
+            };
+          } catch (e) {
+            bodyInfo = {
+              mode: "raw",
+              raw: item.body || ""
+            };
+          }
+        }
+      }
+
+      let finalUrl = item.url || "";
+      const queryParams: any[] = [];
+      if (Array.isArray(item.params)) {
+        item.params.forEach((p: any) => {
+          if (p.enabled && p.key) {
+            queryParams.push({
+              key: p.key,
+              value: p.value
+            });
+          }
+        });
+      }
+      if (item.auth_type === 'apikey' && item.auth_data?.apikey_addTo === 'query' && item.auth_data?.apikey_key) {
+        queryParams.push({
+          key: item.auth_data.apikey_key,
+          value: item.auth_data.apikey_value || ''
+        });
+      }
+
+      return {
+        name: item.name,
+        request: {
+          method: item.method,
+          header: headers,
+          body: bodyInfo,
+          url: {
+            raw: finalUrl,
+            query: queryParams.length > 0 ? queryParams : undefined
+          }
+        },
+        response: []
+      };
+    };
+
+    const translatedRoot = mapItem(node);
+    
+    return {
+      info: {
+        _postman_id: crypto.randomUUID(),
+        name: translatedRoot.name,
+        description: translatedRoot.description || "",
+        schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+      },
+      item: translatedRoot.item
+    };
+  };
+
+  const handleExportPostman = async (colId: string) => {
+    try {
+      const exportData = await getCollectionExportData(colId);
+      if (!exportData) return;
+
+      const postmanData = translateEchoToPostman(exportData);
+
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(postmanData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `${exportData.name || 'collection'}.postman_collection.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    } catch (e) {
+      console.error('Failed to export Postman collection:', e);
+    }
+  };
+
   // Import / Export handlers
   const handleExportFolder = async (colId: string) => {
     try {
@@ -1180,6 +1343,7 @@ function App() {
               }
             }}
             onExportFolder={handleExportFolder}
+            onExportPostman={handleExportPostman}
             onImportCollection={handleImportCollection}
             onHelpClick={() => setShortcutModalOpen(true)}
             onTourClick={() => setTourOpen(true)}
