@@ -3,6 +3,7 @@ import { Modal } from './Modal';
 import { KeyValueEditor } from './KeyValueEditor';
 import { Environment, KeyValueItem } from '../../types';
 import { Plus, Trash2, ShieldAlert } from 'lucide-react';
+import { useAlertDialog } from './AlertDialog';
 
 interface EnvironmentModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function EnvironmentModal({
   onUpdate,
   onDelete,
 }: EnvironmentModalProps) {
+  const { showAlert, showConfirm } = useAlertDialog();
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editVariables, setEditVariables] = useState<KeyValueItem[]>([]);
@@ -61,15 +63,20 @@ export function EnvironmentModal({
       // Clean variables (remove empty rows before saving)
       const cleanedVars = editVariables.filter((v) => v.key.trim() !== '' || v.value.trim() !== '');
       await onUpdate(selectedEnvId, editName.trim(), cleanedVars);
-      alert('Environment saved successfully!');
+      await showAlert('Environment saved successfully!', 'Success', 'success');
     } catch (err) {
       console.error('Failed to save env:', err);
+      await showAlert('Failed to save environment settings.', 'Save Failed');
     }
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this environment?')) return;
+    const confirmed = await showConfirm(
+      'Are you sure you want to delete this environment? This cannot be undone.',
+      'Delete Environment'
+    );
+    if (!confirmed) return;
     try {
       await onDelete(id);
       if (selectedEnvId === id) {

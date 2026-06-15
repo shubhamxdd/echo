@@ -14,8 +14,10 @@ import { useEnvironments } from './hooks/useEnvironments';
 import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } from './types';
 import { Sun, Moon, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { ChatSidebar } from './components/Sidebar/ChatSidebar';
+import { useAlertDialog } from './components/common/AlertDialog';
 
 function App() {
+  const { showAlert, showConfirm } = useAlertDialog();
   const [dbInitialized, setDbInitialized] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme');
@@ -1025,7 +1027,7 @@ function App() {
       await importCollection(parsedData, null);
     } catch (e) {
       console.error('Failed to import collection:', e);
-      alert('Import failed. Please check the JSON format.');
+      await showAlert('Import failed. Please check the JSON format.', 'Import Failed');
     }
   };
 
@@ -1076,13 +1078,15 @@ function App() {
             activeRequestId={activeRequestMeta.id}
             onRequestSelect={handleRequestSelect}
             onHistorySelect={handleHistorySelect}
-            onDeleteHistoryItem={(id) => {
-              if (confirm("Are you sure you want to delete this history item?")) {
+            onDeleteHistoryItem={async (id) => {
+              const confirmed = await showConfirm("Are you sure you want to delete this history item?", "Delete History Item");
+              if (confirmed) {
                 deleteHistoryItem(id);
               }
             }}
-            onClearHistory={() => {
-              if (confirm("Are you sure you want to clear your entire request history? This action cannot be undone.")) {
+            onClearHistory={async () => {
+              const confirmed = await showConfirm("Are you sure you want to clear your entire request history? This action cannot be undone.", "Clear History", "Clear All");
+              if (confirmed) {
                 clearHistory();
               }
             }}
@@ -1090,13 +1094,15 @@ function App() {
             onCreateSubfolder={(parentId) => openCreateColModal(parentId)}
             onCreateRequest={handleSidebarCreateRequest}
             onRenameFolder={openRenameColModal}
-            onDeleteFolder={(id) => {
-              if (confirm("Are you sure you want to delete this collection? This will permanently delete all sub-collections and requests inside it.")) {
+            onDeleteFolder={async (id) => {
+              const confirmed = await showConfirm("Are you sure you want to delete this collection? This will permanently delete all sub-collections and requests inside it.", "Delete Collection", "Delete");
+              if (confirmed) {
                 deleteCollection(id);
               }
             }}
-            onDeleteRequest={(id) => {
-              if (confirm("Are you sure you want to delete this saved request?")) {
+            onDeleteRequest={async (id) => {
+              const confirmed = await showConfirm("Are you sure you want to delete this saved request?", "Delete Saved Request", "Delete");
+              if (confirmed) {
                 deleteRequest(id);
                 const tab = tabs.find((t) => t.savedRequestId === id);
                 if (tab) {

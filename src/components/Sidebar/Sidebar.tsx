@@ -3,6 +3,7 @@ import { Collection, SavedRequest, HistoryItem } from '../../types';
 import { CollectionTree } from './CollectionTree';
 import { HistoryList } from './HistoryList';
 import { FolderPlus, Search, History, FolderOpen, Upload, HelpCircle, Compass } from 'lucide-react';
+import { useAlertDialog } from '../common/AlertDialog';
 
 interface SidebarProps {
   collections: Collection[];
@@ -51,6 +52,7 @@ export function Sidebar({
   onDuplicateFolder,
   onDuplicateRequest,
 }: SidebarProps) {
+  const { showAlert } = useAlertDialog();
   const [activeTab, setActiveTab] = useState<'collections' | 'history'>('collections');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -154,7 +156,7 @@ export function Sidebar({
                     const parsed = JSON.parse(event.target?.result as string);
                     onImportCollection(parsed);
                   } catch (err) {
-                    alert('Invalid JSON file');
+                    showAlert('Failed to parse the imported JSON file. Please ensure it is a valid Echo Collection file.', 'Invalid JSON File');
                   }
                 };
                 reader.readAsText(file);

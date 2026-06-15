@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HttpResponse, KeyValueItem } from '../../types';
 import { fetch } from '@tauri-apps/plugin-http';
+import { useAlertDialog } from '../common/AlertDialog';
 import {
   Send,
   Sparkles,
@@ -94,6 +95,8 @@ export function ChatSidebar({
   activeEnvVariables,
   onClose,
 }: ChatSidebarProps) {
+  const { showConfirm } = useAlertDialog();
+
   // Active Running Config
   const [provider, setProvider] = useState<AIProvider>('gemini');
   const [model, setModel] = useState<string>('gemini-2.5-flash');
@@ -271,8 +274,13 @@ export function ChatSidebar({
     setErrorMsg(null);
   };
 
-  const handleDeleteSession = (id: string) => {
-    if (confirm('Delete this chat session?')) {
+  const handleDeleteSession = async (id: string) => {
+    const confirmed = await showConfirm(
+      'Are you sure you want to permanently delete this chat session and all its messages?',
+      'Delete Chat Session',
+      'Delete'
+    );
+    if (confirmed) {
       const updated = sessions.filter(s => s.id !== id);
       if (updated.length === 0) {
         const initialId = crypto.randomUUID();
