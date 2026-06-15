@@ -42,10 +42,18 @@ export async function initDb(): Promise<void> {
         body          TEXT,
         auth_type     TEXT,
         auth_data     TEXT,
+        assertions    TEXT,
         created_at    INTEGER NOT NULL,
         updated_at    INTEGER NOT NULL
       );
     `);
+
+    // Migration: Add assertions column to requests table if it doesn't exist
+    try {
+      await db.execute('ALTER TABLE requests ADD COLUMN assertions TEXT;');
+    } catch (_) {
+      // Column already exists, ignore
+    }
 
     // 3. Create history table
     await db.execute(`

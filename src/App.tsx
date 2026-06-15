@@ -983,7 +983,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans select-none">
+    <div className="flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans">
       {/* 1. Left Sidebar */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[280px]'} h-full shrink-0 flex overflow-hidden border-r border-zinc-800/80`}>
         <div id="tour-sidebar" className="w-[280px] h-full flex flex-col shrink-0">

@@ -31,8 +31,8 @@ Here is a guide on how to operate Echo and where to find key features:
   * **Duplication**: Hover over a collection or request and click the **Copy** icon to clone it (including all nested subfolders and requests) instantly.
   * **Renaming/Deleting**: Rename folders via the Edit button. Deletions will request confirmation first.
   * **Export/Import**: Click the export icon on folders to generate a JSON bundle. Click the import button at the top of the sidebar to import collections.
-  * **Drag and Drop**: Drag any request from the sidebar and drop it directly onto another collection folder, or onto another request (moving it to that request's parent collection). Dynamic orange highlights show valid drop targets.
-  * **Onboarding Walkthrough**: Click the **Compass** icon in the sidebar header to launch the interactive step-by-step UI Tour.
+  * **Drag and Drop**: [TODO] A nested drag-and-drop mechanism to reorganize requests directly within collection folders is planned for a future update.
+  * **Onboarding Walkthrough**: Click the **Compass** icon in the sidebar header to launch the interactive step-by-step UI Tour. The walkthrough automatically seeds your workspace with live, real-world mock user data fetched from the public `https://fakestoreapi.com/users` API.
 * **History Tab**: Automatically records every request executed. Click any history item to reload its full request parameters and response details.
 * **Sidebar Collapse**: Click the arrow (`<` or `>`) at the top of the sidebar to collapse it, maximizing your coding real estate.
 
@@ -59,6 +59,19 @@ Here is a guide on how to operate Echo and where to find key features:
 ### 6. Code Snippet Generator
 * **Generate Code**: Click the **Code** button next to **Save** in the Url Bar.
 * Select from **cURL**, **JavaScript Fetch**, **Python Requests**, or **Rust Reqwest** to get copy-pasteable snippets, pre-resolved with your active environment variables.
+
+---
+
+## 🛠️ Under Active Development
+
+The following premium features are currently scaffolded at the backend and database levels, with UI integration in progress:
+
+* **OpenAPI & cURL Importing**:
+  * Implemented parser utilities in [curl.ts](file:///C:/Users/Shubham/Desktop/app/postman/src/lib/curl.ts) and [openapi.ts](file:///C:/Users/Shubham/Desktop/app/postman/src/lib/openapi.ts) to handle raw cURL command structures and OpenAPI/Swagger JSON specifications.
+* **Response Assertions**:
+  * SQLite database table migration in [db.ts](file:///C:/Users/Shubham/Desktop/app/postman/src/lib/db.ts) and typing structures in [types/index.ts](file:///C:/Users/Shubham/Desktop/app/postman/src/types/index.ts) are fully prepared to support validation rules (e.g. status code verification, response time limits, JSON body matching).
+* **Sidebar Drag & Drop**:
+  * Re-architecting the mouse/drag handles to provide a native-feeling, glitch-free drag experience across sub-folders in WebView2 environments.
 
 ---
 

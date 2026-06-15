@@ -16,6 +16,14 @@ export interface Collection {
   requests?: SavedRequest[];
 }
 
+export interface AssertionItem {
+  id: string;
+  type: 'status_code' | 'duration' | 'body_json' | 'header_exists';
+  targetValue: string;
+  expectedValue: string;
+  enabled: boolean;
+}
+
 export interface SavedRequest {
   id: string;
   collection_id: string;
@@ -35,6 +43,7 @@ export interface SavedRequest {
     apikey_value?: string;
     apikey_addTo?: 'header' | 'query';
   };
+  assertions?: AssertionItem[];
   created_at: number;
   updated_at: number;
 }
