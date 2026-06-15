@@ -60,6 +60,11 @@ Here is a guide on how to operate Echo and where to find key features:
 * **Generate Code**: Click the **Code** button next to **Save** in the Url Bar.
 * Select from **cURL**, **JavaScript Fetch**, **Python Requests**, or **Rust Reqwest** to get copy-pasteable snippets, pre-resolved with your active environment variables.
 
+### 7. Collapsible AI Assistant (Right Sidebar)
+* **AI Chatbot**: Click the **Sparkles** icon in the Top Header Bar to toggle the context-aware AI chatbot assistant.
+* **Context Integration**: The chatbot automatically analyzes the active request parameters, environment variables, headers, and response payloads to help you generate assertions, write integration code snippets, explain payload schemas, and diagnose errors.
+* **Gemini Support**: Paste your Gemini API key (stored securely in your local browser storage) to get started. Includes quick-trigger command macro buttons.
+
 ---
 
 ## 🛠️ Under Active Development

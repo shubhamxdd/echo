@@ -12,7 +12,8 @@ import { useHistory } from './hooks/useHistory';
 import { useRequest } from './hooks/useRequest';
 import { useEnvironments } from './hooks/useEnvironments';
 import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } from './types';
-import { Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sun, Moon, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChatSidebar } from './components/Sidebar/ChatSidebar';
 
 function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -128,6 +129,7 @@ function App() {
 
   // Sidebar collapsed state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [chatSidebarCollapsed, setChatSidebarCollapsed] = useState(true);
 
   // Move request modal states
   const [moveReqModalOpen, setMoveReqModalOpen] = useState(false);
@@ -1099,6 +1101,18 @@ function App() {
             </button>
 
             <button
+              onClick={() => setChatSidebarCollapsed(!chatSidebarCollapsed)}
+              className={`p-1.5 rounded-md border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                !chatSidebarCollapsed
+                  ? 'bg-orange-950/20 border-orange-500/50 text-orange-400'
+                  : 'text-zinc-400 hover:text-zinc-100 bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+              }`}
+              title="Toggle AI Assistant"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+
+            <button
               onClick={handleNewRequest}
               className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 py-1.5 px-2.5 rounded-md font-medium transition-all select-none cursor-pointer"
               title="Create clean request workspace (Ctrl+N)"
@@ -1184,6 +1198,27 @@ function App() {
         {/* Response Panel (Bottom Half) */}
         <div id="tour-response-panel" className="flex-1 min-h-[150px] overflow-hidden flex flex-col">
           <ResponsePanel response={activeResponse} loading={requestLoading} />
+        </div>
+      </div>
+
+      {/* 3. Right Sidebar (AI Chatbot) */}
+      <div className={`transition-all duration-300 ${chatSidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[320px] border-l border-zinc-800/80'} h-full shrink-0 flex overflow-hidden`}>
+        <div className="w-[320px] h-full flex flex-col shrink-0">
+          <ChatSidebar
+            activeRequestMeta={activeRequestMeta}
+            method={method}
+            url={url}
+            headers={headers}
+            params={params}
+            bodyType={bodyType}
+            body={body}
+            authType={authType}
+            authData={authData}
+            activeResponse={activeResponse}
+            activeEnvName={activeEnvId ? environments.find(e => e.id === activeEnvId)?.name || 'No Environment' : 'No Environment'}
+            activeEnvVariables={activeEnvId ? environments.find(e => e.id === activeEnvId)?.variables || [] : []}
+            onClose={() => setChatSidebarCollapsed(true)}
+          />
         </div>
       </div>
 
