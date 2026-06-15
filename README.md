@@ -31,7 +31,8 @@ Here is a guide on how to operate Echo and where to find key features:
   * **Duplication**: Hover over a collection or request and click the **Copy** icon to clone it (including all nested subfolders and requests) instantly.
   * **Renaming/Deleting**: Rename folders via the Edit button. Deletions will request confirmation first.
   * **Export/Import**: Click the export icon on folders to generate a JSON bundle. Click the import button at the top of the sidebar to import collections.
-  * **Drag and Drop**: Drag a request from one collection/subfolder and drop it directly onto another collection folder to move it instantly.
+  * **Drag and Drop**: Drag any request from the sidebar and drop it directly onto another collection folder, or onto another request (moving it to that request's parent collection). Dynamic orange highlights show valid drop targets.
+  * **Onboarding Walkthrough**: Click the **Compass** icon in the sidebar header to launch the interactive step-by-step UI Tour.
 * **History Tab**: Automatically records every request executed. Click any history item to reload its full request parameters and response details.
 * **Sidebar Collapse**: Click the arrow (`<` or `>`) at the top of the sidebar to collapse it, maximizing your coding real estate.
 
@@ -66,6 +67,11 @@ Here is a guide on how to operate Echo and where to find key features:
 * **`Ctrl + Enter`**: Send the HTTP Request.
 * **`Ctrl + S`**: Save request configuration.
 * **`Ctrl + N`**: Open a new workspace request tab.
+* **`Ctrl + B`**: Toggle sidebar visibility.
+* **`Ctrl + Alt + E`**: Toggle Environments Manager modal.
+* **`Ctrl + Shift + C`**: Toggle Code Snippet Generator modal.
+* **`Alt + [1 - 9]`**: Switch to Tab 1-9.
+* **`Escape`**: Close active modal.
 * **`?`**: Press outside input fields to toggle the shortcuts cheatsheet overlay.
 
 ---

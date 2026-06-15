@@ -5,6 +5,7 @@ import { ResponsePanel } from './components/ResponsePanel/ResponsePanel';
 import { Modal } from './components/common/Modal';
 import { EnvironmentModal } from './components/common/EnvironmentModal';
 import { SnippetModal } from './components/common/SnippetModal';
+import { GuideTour } from './components/common/GuideTour';
 import { initDb } from './lib/db';
 import { useCollections } from './hooks/useCollections';
 import { useHistory } from './hooks/useHistory';
@@ -137,6 +138,7 @@ function App() {
   const [activeEnvId, setActiveEnvId] = useState<string | null>(null);
   const [envModalOpen, setEnvModalOpen] = useState(false);
   const [snippetModalOpen, setSnippetModalOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Panel Resizer State and Helpers
@@ -192,6 +194,19 @@ function App() {
       loadEnvironments();
     }
   }, [dbInitialized, loadCollections, loadHistory, loadEnvironments]);
+
+  // 3b. Onboarding Guide Tour Auto-Trigger
+  useEffect(() => {
+    if (dbInitialized) {
+      const tourDone = localStorage.getItem('echo_tour_done');
+      if (tourDone !== 'true') {
+        const timer = setTimeout(() => {
+          setTourOpen(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [dbInitialized]);
 
   // 4. Initialize first default tab if empty
   useEffect(() => {
@@ -870,7 +885,7 @@ function App() {
     <div className="flex h-screen bg-zinc-950 text-zinc-150 overflow-hidden font-sans select-none">
       {/* 1. Left Sidebar */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[280px]'} h-full shrink-0 flex overflow-hidden border-r border-zinc-800/80`}>
-        <div className="w-[280px] h-full flex flex-col shrink-0">
+        <div id="tour-sidebar" className="w-[280px] h-full flex flex-col shrink-0">
           <Sidebar
             collections={collections}
             historyItems={historyList}
@@ -910,6 +925,7 @@ function App() {
             onExportFolder={handleExportFolder}
             onImportCollection={handleImportCollection}
             onHelpClick={() => setShortcutModalOpen(true)}
+            onTourClick={() => setTourOpen(true)}
             onMoveRequest={handleOpenMoveRequestModal}
             onMoveRequestDirect={handleMoveRequestDirect}
             onDuplicateFolder={duplicateCollection}
@@ -945,7 +961,7 @@ function App() {
           
           <div className="flex items-center gap-2">
             {/* Environment Selector */}
-            <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-md px-2 py-1 mr-1">
+            <div id="tour-env-selector" className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-md px-2 py-1 mr-1">
               <span className="text-[10px] text-zinc-500 font-medium select-none">Env:</span>
               <select
                 value={activeEnvId || ''}
@@ -992,7 +1008,7 @@ function App() {
         </div>
 
         {/* Workspace Tab Bar */}
-        <div className="flex bg-zinc-950 border-b border-zinc-800/80 items-center overflow-x-auto select-none no-scrollbar h-9 shrink-0">
+        <div id="tour-tabbar" className="flex bg-zinc-950 border-b border-zinc-800/80 items-center overflow-x-auto select-none no-scrollbar h-9 shrink-0">
           {tabs.map((tab) => {
             const isActive = tab.id === activeTabId;
             return (
@@ -1065,7 +1081,7 @@ function App() {
         />
 
         {/* Response Panel (Bottom Half) */}
-        <div className="flex-1 min-h-[150px] overflow-hidden flex flex-col">
+        <div id="tour-response-panel" className="flex-1 min-h-[150px] overflow-hidden flex flex-col">
           <ResponsePanel response={activeResponse} loading={requestLoading} />
         </div>
       </div>
@@ -1305,6 +1321,12 @@ function App() {
         authType={authType}
         authData={authData}
         resolvedEnvVars={getResolvedEnvVars()}
+      />
+
+      {/* Guide Tour Walkthrough */}
+      <GuideTour
+        isOpen={tourOpen}
+        onClose={() => setTourOpen(false)}
       />
     </div>
   );

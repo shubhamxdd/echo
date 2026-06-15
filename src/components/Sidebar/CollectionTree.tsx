@@ -46,6 +46,7 @@ export function CollectionTree({
   onDuplicateRequest,
 }: CollectionTreeProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [dragOverColId, setDragOverColId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -76,15 +77,25 @@ export function CollectionTree({
       <div key={col.id} className="select-none">
         {/* Collection Folder Row */}
         <div
-          className="group flex items-center justify-between py-1.5 hover:bg-zinc-800/40 rounded-md cursor-pointer transition-colors px-2 text-zinc-300 hover:text-zinc-100"
+          className={`group flex items-center justify-between py-1.5 hover:bg-zinc-800/40 rounded-md cursor-pointer transition-all px-2 text-zinc-300 hover:text-zinc-100 ${
+            dragOverColId === col.id ? 'bg-orange-950/20 border border-orange-500/35' : ''
+          }`}
           style={{ paddingLeft: `${depth * 12 + 6}px` }}
           onClick={() => toggleExpand(col.id)}
           onDragOver={(e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
           }}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            setDragOverColId(col.id);
+          }}
+          onDragLeave={() => {
+            setDragOverColId(null);
+          }}
           onDrop={async (e) => {
             e.preventDefault();
+            setDragOverColId(null);
             const reqId = e.dataTransfer.getData('text/plain');
             const sourceColId = e.dataTransfer.getData('sourceCollectionId');
             if (reqId && sourceColId !== col.id) {
@@ -198,6 +209,8 @@ export function CollectionTree({
                     className={`group flex items-center justify-between py-1.5 px-2 rounded-md cursor-pointer transition-all ${
                       isActive
                         ? 'bg-orange-950/20 text-orange-200 border-l-2 border-orange-500 font-medium'
+                        : dragOverColId === req.id
+                        ? 'bg-orange-950/10 border border-orange-500/35 font-medium'
                         : 'hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200'
                     }`}
                     style={{ paddingLeft: `${(depth + 1) * 12 + 18}px` }}
@@ -206,6 +219,26 @@ export function CollectionTree({
                     onDragStart={(e) => {
                       e.dataTransfer.setData('text/plain', req.id);
                       e.dataTransfer.setData('sourceCollectionId', req.collection_id);
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                    }}
+                    onDragEnter={(e) => {
+                      e.preventDefault();
+                      setDragOverColId(req.id);
+                    }}
+                    onDragLeave={() => {
+                      setDragOverColId(null);
+                    }}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      setDragOverColId(null);
+                      const draggedReqId = e.dataTransfer.getData('text/plain');
+                      const sourceColId = e.dataTransfer.getData('sourceCollectionId');
+                      if (draggedReqId && sourceColId !== req.collection_id && draggedReqId !== req.id) {
+                        await onMoveRequestDirect?.(draggedReqId, req.collection_id);
+                      }
                     }}
                   >
                     <div className="flex items-center gap-2 overflow-hidden flex-1">

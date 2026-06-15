@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Collection, SavedRequest, HistoryItem } from '../../types';
 import { CollectionTree } from './CollectionTree';
 import { HistoryList } from './HistoryList';
-import { FolderPlus, Search, History, FolderOpen, Upload, HelpCircle } from 'lucide-react';
+import { FolderPlus, Search, History, FolderOpen, Upload, HelpCircle, Compass } from 'lucide-react';
 
 interface SidebarProps {
   collections: Collection[];
@@ -21,6 +21,7 @@ interface SidebarProps {
   onExportFolder: (id: string) => void;
   onImportCollection: (data: any) => void;
   onHelpClick: () => void;
+  onTourClick?: () => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
   onMoveRequestDirect?: (requestId: string, targetCollectionId: string) => void;
   onDuplicateFolder?: (id: string) => void;
@@ -44,6 +45,7 @@ export function Sidebar({
   onExportFolder,
   onImportCollection,
   onHelpClick,
+  onTourClick,
   onMoveRequest,
   onMoveRequestDirect,
   onDuplicateFolder,
@@ -114,6 +116,17 @@ export function Sidebar({
           <span className="font-semibold text-xs tracking-wide text-zinc-100">Echo</span>
         </div>
         <div className="flex items-center gap-1">
+          {/* Tour Button */}
+          {onTourClick && (
+            <button
+              onClick={onTourClick}
+              className="text-zinc-400 hover:text-orange-400 p-1.5 rounded-md hover:bg-zinc-850 transition-colors cursor-pointer"
+              title="Take a Quick Tour"
+            >
+              <Compass className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Help Button */}
           <button
             onClick={onHelpClick}

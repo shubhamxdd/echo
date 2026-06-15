@@ -84,7 +84,7 @@ export function RequestPanel({
       />
 
       {/* Tabs Menu */}
-      <div className="flex gap-4 border-b border-zinc-800 pb-1 text-xs font-medium">
+      <div id="tour-reqtabs" className="flex gap-4 border-b border-zinc-800 pb-1 text-xs font-medium">
         <button
           onClick={() => setActiveTab('params')}
           className={`pb-2 transition-all relative cursor-pointer select-none ${

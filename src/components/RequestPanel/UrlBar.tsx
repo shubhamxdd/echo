@@ -45,7 +45,7 @@ export function UrlBar({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-zinc-900/40 p-2 rounded-lg border border-zinc-800 relative">
+    <div id="tour-urlbar" className="flex items-center gap-2 bg-zinc-900/40 p-2 rounded-lg border border-zinc-800 relative">
       {/* HTTP Method Dropdown */}
       <div className="relative">
         <button
@@ -87,27 +87,30 @@ export function UrlBar({
         />
       </div>
 
-      {/* Code Snippet Button */}
-      {onGenerateCode && (
-        <button
-          onClick={onGenerateCode}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
-          title="Generate Code Snippet"
-        >
-          <Code className="w-3.5 h-3.5" />
-          <span>Code</span>
-        </button>
-      )}
+      {/* Actions (Code Snippet & Save) */}
+      <div id="tour-actionsbar" className="flex items-center gap-2">
+        {/* Code Snippet Button */}
+        {onGenerateCode && (
+          <button
+            onClick={onGenerateCode}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
+            title="Generate Code Snippet"
+          >
+            <Code className="w-3.5 h-3.5" />
+            <span>Code</span>
+          </button>
+        )}
 
-      {/* Save Button */}
-      <button
-        onClick={onSave}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
-        title="Save configuration (Ctrl+S)"
-      >
-        <Save className="w-3.5 h-3.5" />
-        <span>Save</span>
-      </button>
+        {/* Save Button */}
+        <button
+          onClick={onSave}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
+          title="Save configuration (Ctrl+S)"
+        >
+          <Save className="w-3.5 h-3.5" />
+          <span>Save</span>
+        </button>
+      </div>
 
       {/* Send / Cancel Button */}
       {loading ? (
