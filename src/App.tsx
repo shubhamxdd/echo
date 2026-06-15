@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { RequestPanel } from './components/RequestPanel/RequestPanel';
 import { ResponsePanel } from './components/ResponsePanel/ResponsePanel';
 import { Modal } from './components/common/Modal';
+import { EnvironmentModal } from './components/common/EnvironmentModal';
+import { SnippetModal } from './components/common/SnippetModal';
 import { initDb } from './lib/db';
 import { useCollections } from './hooks/useCollections';
 import { useHistory } from './hooks/useHistory';
 import { useRequest } from './hooks/useRequest';
+import { useEnvironments } from './hooks/useEnvironments';
 import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } from './types';
 import { Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -42,6 +45,8 @@ function App() {
     saveRequest,
     deleteRequest,
     moveRequest,
+    duplicateRequest,
+    duplicateCollection,
     getCollectionExportData,
     importCollection,
   } = useCollections();
@@ -55,6 +60,14 @@ function App() {
   } = useHistory();
 
   const { sendRequest, loading: requestLoading } = useRequest();
+
+  const {
+    environments,
+    loadEnvironments,
+    createEnvironment,
+    updateEnvironment,
+    deleteEnvironment,
+  } = useEnvironments();
 
   // 1. Multi-Tab State
   interface RequestTab {
@@ -120,6 +133,12 @@ function App() {
   const [moveReqTargetId, setMoveReqTargetId] = useState<string | null>(null);
   const [moveReqCollectionId, setMoveReqCollectionId] = useState('');
 
+  // Environment and Snippet States
+  const [activeEnvId, setActiveEnvId] = useState<string | null>(null);
+  const [envModalOpen, setEnvModalOpen] = useState(false);
+  const [snippetModalOpen, setSnippetModalOpen] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // 2. Initialize SQLite Database
   useEffect(() => {
     async function setup() {
@@ -138,8 +157,9 @@ function App() {
     if (dbInitialized) {
       loadCollections();
       loadHistory();
+      loadEnvironments();
     }
-  }, [dbInitialized, loadCollections, loadHistory]);
+  }, [dbInitialized, loadCollections, loadHistory, loadEnvironments]);
 
   // 4. Initialize first default tab if empty
   useEffect(() => {
@@ -403,37 +423,111 @@ function App() {
     }
   };
 
+  // Variable resolving helper
+  const resolveVars = (str: string): string => {
+    if (!str || !activeEnvId) return str;
+    const activeEnv = environments.find((e) => e.id === activeEnvId);
+    if (!activeEnv) return str;
+
+    let result = str;
+    activeEnv.variables.forEach((variable) => {
+      if (variable.enabled && variable.key.trim()) {
+        const escapedKey = variable.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`{{\\s*${escapedKey}\\s*}}`, 'g');
+        result = result.replace(regex, variable.value);
+      }
+    });
+    return result;
+  };
+
+  const getResolvedEnvVars = (): Record<string, string> => {
+    if (!activeEnvId) return {};
+    const activeEnv = environments.find((e) => e.id === activeEnvId);
+    if (!activeEnv) return {};
+    const vars: Record<string, string> = {};
+    activeEnv.variables.forEach((v) => {
+      if (v.enabled && v.key.trim()) {
+        vars[v.key.trim()] = v.value;
+      }
+    });
+    return vars;
+  };
+
+  // Request Cancellation Handler
+  const handleCancelRequest = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
+
   // 11. Send Request handler
   const handleSend = async () => {
     if (!url.trim()) return;
 
-    const response = await sendRequest(
-      method,
-      url,
-      headers,
-      params,
-      bodyType,
-      body,
-      authType,
-      authData
-    );
+    // Create abort controller for cancellation
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-    setActiveResponse(response);
+    // Resolve variables
+    const resolvedUrl = resolveVars(url);
+    const resolvedHeaders = headers.map(h => ({
+      ...h,
+      key: resolveVars(h.key),
+      value: resolveVars(h.value)
+    }));
+    const resolvedParams = params.map(p => ({
+      ...p,
+      key: resolveVars(p.key),
+      value: resolveVars(p.value)
+    }));
+    const resolvedBody = resolveVars(body);
 
-    // Save in SQLite History
-    if (dbInitialized) {
-      const cleanedHeaders = headers.filter((h) => h.key.trim() !== '');
-      await addHistoryItem({
+    const resolvedAuthData = { ...authData };
+    if (authType === 'bearer' && authData?.bearer_token) {
+      resolvedAuthData.bearer_token = resolveVars(authData.bearer_token);
+    } else if (authType === 'basic') {
+      if (authData?.basic_username) resolvedAuthData.basic_username = resolveVars(authData.basic_username);
+      if (authData?.basic_password) resolvedAuthData.basic_password = resolveVars(authData.basic_password);
+    } else if (authType === 'apikey') {
+      if (authData?.apikey_key) resolvedAuthData.apikey_key = resolveVars(authData.apikey_key);
+      if (authData?.apikey_value) resolvedAuthData.apikey_value = resolveVars(authData.apikey_value);
+    }
+
+    try {
+      const response = await sendRequest(
         method,
-        url,
-        status_code: response.status,
-        duration_ms: response.duration_ms,
-        request_headers: cleanedHeaders,
-        request_body: bodyType !== 'none' ? body : null,
-        response_headers: response.headers,
-        response_body: response.body,
-        error: response.error,
-      });
+        resolvedUrl,
+        resolvedHeaders,
+        resolvedParams,
+        bodyType,
+        resolvedBody,
+        authType,
+        resolvedAuthData,
+        controller.signal
+      );
+
+      setActiveResponse(response);
+
+      // Save in SQLite History
+      if (dbInitialized) {
+        const cleanedHeaders = headers.filter((h) => h.key.trim() !== '');
+        await addHistoryItem({
+          method,
+          url,
+          status_code: response.status,
+          duration_ms: response.duration_ms,
+          request_headers: cleanedHeaders,
+          request_body: bodyType !== 'none' ? body : null,
+          response_headers: response.headers,
+          response_body: response.body,
+          error: response.error,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      abortControllerRef.current = null;
     }
   };
 
@@ -537,6 +631,33 @@ function App() {
       }
     });
     return result;
+  };
+
+  const handleMoveRequestDirect = async (requestId: string, targetCollectionId: string) => {
+    try {
+      await moveRequest(requestId, targetCollectionId);
+      
+      // Update activeRequestMeta if the moved request is the active one
+      if (activeRequestMeta.id === requestId) {
+        setActiveRequestMeta(prev => ({
+          ...prev,
+          collectionId: targetCollectionId
+        }));
+      }
+
+      // Also update matching tabs so state synchronizes
+      setTabs(prevTabs => prevTabs.map(t => {
+        if (t.savedRequestId === requestId) {
+          return {
+            ...t,
+            collectionId: targetCollectionId
+          };
+        }
+        return t;
+      }));
+    } catch (err) {
+      console.error('Failed to move request:', err);
+    }
   };
 
   // Move request handlers
@@ -718,6 +839,9 @@ function App() {
             onImportCollection={handleImportCollection}
             onHelpClick={() => setShortcutModalOpen(true)}
             onMoveRequest={handleOpenMoveRequestModal}
+            onMoveRequestDirect={handleMoveRequestDirect}
+            onDuplicateFolder={duplicateCollection}
+            onDuplicateRequest={duplicateRequest}
           />
         </div>
       </div>
@@ -748,6 +872,35 @@ function App() {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Environment Selector */}
+            <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-md px-2 py-1 mr-1">
+              <span className="text-[10px] text-zinc-500 font-medium select-none">Env:</span>
+              <select
+                value={activeEnvId || ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '__manage__') {
+                    // Reset value so dropdown doesn't stay on __manage__
+                    e.target.value = activeEnvId || '';
+                    setEnvModalOpen(true);
+                  } else {
+                    setActiveEnvId(val || null);
+                  }
+                }}
+                className="bg-transparent text-[11px] text-zinc-300 border-none outline-none focus:ring-0 max-w-[120px] truncate cursor-pointer font-medium py-0.5"
+              >
+                <option value="" className="bg-zinc-900 text-zinc-400">No Environment</option>
+                {environments.map((env) => (
+                  <option key={env.id} value={env.id} className="bg-zinc-900 text-zinc-300">
+                    {env.name}
+                  </option>
+                ))}
+                <option value="__manage__" className="bg-zinc-900 text-orange-400 font-medium">
+                  ⚙️ Manage...
+                </option>
+              </select>
+            </div>
+
             <button
               onClick={toggleDarkMode}
               className="text-zinc-400 hover:text-zinc-100 p-1.5 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer flex items-center justify-center"
@@ -824,6 +977,8 @@ function App() {
             onSend={handleSend}
             onSave={handleSaveLaunch}
             loading={requestLoading}
+            onCancel={handleCancelRequest}
+            onGenerateCode={() => setSnippetModalOpen(true)}
           />
         </div>
 
@@ -1029,6 +1184,31 @@ function App() {
           </div>
         </div>
       </Modal>
+
+      {/* Environment Management Modal */}
+      <EnvironmentModal
+        isOpen={envModalOpen}
+        onClose={() => setEnvModalOpen(false)}
+        environments={environments}
+        onCreate={createEnvironment}
+        onUpdate={updateEnvironment}
+        onDelete={deleteEnvironment}
+      />
+
+      {/* Code Snippet Modal */}
+      <SnippetModal
+        isOpen={snippetModalOpen}
+        onClose={() => setSnippetModalOpen(false)}
+        method={method}
+        url={url}
+        headers={headers}
+        params={params}
+        bodyType={bodyType}
+        body={body}
+        authType={authType}
+        authData={authData}
+        resolvedEnvVars={getResolvedEnvVars()}
+      />
     </div>
   );
 }

@@ -30,6 +30,8 @@ interface RequestPanelProps {
   onSend: () => void;
   onSave: () => void;
   loading: boolean;
+  onCancel?: () => void;
+  onGenerateCode?: () => void;
 }
 
 export function RequestPanel({
@@ -52,6 +54,8 @@ export function RequestPanel({
   onSend,
   onSave,
   loading,
+  onCancel,
+  onGenerateCode,
 }: RequestPanelProps) {
   const [activeTab, setActiveTab] = useState<'params' | 'headers' | 'body' | 'auth'>('params');
 
@@ -75,6 +79,8 @@ export function RequestPanel({
         onSend={onSend}
         onSave={onSave}
         loading={loading}
+        onCancel={onCancel}
+        onGenerateCode={onGenerateCode}
       />
 
       {/* Tabs Menu */}

@@ -25,6 +25,7 @@ interface CollectionTreeProps {
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
+  onMoveRequestDirect?: (requestId: string, targetCollectionId: string) => void;
   onDuplicateFolder?: (id: string) => void;
   onDuplicateRequest?: (id: string) => void;
 }
@@ -40,6 +41,7 @@ export function CollectionTree({
   onDeleteRequest,
   onExportFolder,
   onMoveRequest,
+  onMoveRequestDirect,
   onDuplicateFolder,
   onDuplicateRequest,
 }: CollectionTreeProps) {
@@ -86,7 +88,7 @@ export function CollectionTree({
             const reqId = e.dataTransfer.getData('text/plain');
             const sourceColId = e.dataTransfer.getData('sourceCollectionId');
             if (reqId && sourceColId !== col.id) {
-              await onMoveRequest?.(reqId, col.id);
+              await onMoveRequestDirect?.(reqId, col.id);
             }
           }}
         >

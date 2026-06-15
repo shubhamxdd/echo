@@ -22,6 +22,7 @@ interface SidebarProps {
   onImportCollection: (data: any) => void;
   onHelpClick: () => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
+  onMoveRequestDirect?: (requestId: string, targetCollectionId: string) => void;
   onDuplicateFolder?: (id: string) => void;
   onDuplicateRequest?: (id: string) => void;
 }
@@ -44,6 +45,7 @@ export function Sidebar({
   onImportCollection,
   onHelpClick,
   onMoveRequest,
+  onMoveRequestDirect,
   onDuplicateFolder,
   onDuplicateRequest,
 }: SidebarProps) {
@@ -214,6 +216,7 @@ export function Sidebar({
             onDeleteRequest={onDeleteRequest}
             onExportFolder={onExportFolder}
             onMoveRequest={onMoveRequest}
+            onMoveRequestDirect={onMoveRequestDirect}
             onDuplicateFolder={onDuplicateFolder}
             onDuplicateRequest={onDuplicateRequest}
           />

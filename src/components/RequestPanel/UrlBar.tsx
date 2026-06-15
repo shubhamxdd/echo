@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Save } from 'lucide-react';
+import { Send, Save, Code } from 'lucide-react';
 
 interface UrlBarProps {
   method: string;
@@ -9,6 +9,8 @@ interface UrlBarProps {
   onSend: () => void;
   onSave: () => void;
   loading: boolean;
+  onCancel?: () => void;
+  onGenerateCode?: () => void;
 }
 
 export function UrlBar({
@@ -19,6 +21,8 @@ export function UrlBar({
   onSend,
   onSave,
   loading,
+  onCancel,
+  onGenerateCode,
 }: UrlBarProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -83,38 +87,47 @@ export function UrlBar({
         />
       </div>
 
+      {/* Code Snippet Button */}
+      {onGenerateCode && (
+        <button
+          onClick={onGenerateCode}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
+          title="Generate Code Snippet"
+        >
+          <Code className="w-3.5 h-3.5" />
+          <span>Code</span>
+        </button>
+      )}
+
       {/* Save Button */}
       <button
         onClick={onSave}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded font-semibold text-zinc-300 transition-all select-none cursor-pointer"
         title="Save configuration (Ctrl+S)"
       >
         <Save className="w-3.5 h-3.5" />
         <span>Save</span>
       </button>
 
-      {/* Send Button */}
-      <button
-        onClick={onSend}
-        disabled={loading}
-        className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded text-white transition-all select-none shadow ${
-          loading
-            ? 'bg-amber-600 cursor-not-allowed hover:bg-amber-600'
-            : 'bg-orange-600 hover:bg-orange-500 active:scale-98 cursor-pointer'
-        }`}
-      >
-        {loading ? (
-          <>
-            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Sending</span>
-          </>
-        ) : (
-          <>
-            <Send className="w-3.5 h-3.5" />
-            <span>Send</span>
-          </>
-        )}
-      </button>
+      {/* Send / Cancel Button */}
+      {loading ? (
+        <button
+          onClick={onCancel}
+          className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded text-white bg-red-650 hover:bg-red-500 active:scale-98 transition-all select-none shadow cursor-pointer"
+          title="Abort Request"
+        >
+          <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <span>Cancel</span>
+        </button>
+      ) : (
+        <button
+          onClick={onSend}
+          className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded text-white bg-orange-600 hover:bg-orange-500 active:scale-98 transition-all select-none shadow cursor-pointer"
+        >
+          <Send className="w-3.5 h-3.5" />
+          <span>Send</span>
+        </button>
+      )}
     </div>
   );
 }
