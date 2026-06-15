@@ -36,25 +36,25 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
       </div>
 
       {/* Main Content Pane */}
-      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-center">
+      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-start">
         {loading ? (
           // Loading State
-          <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-550 text-xs">
+          <div className="flex flex-col items-center justify-center py-6 gap-3 text-zinc-550 text-xs my-auto">
             <span className="w-6 h-6 border-2 border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
             <span>Executing request... Bypassing CORS natively...</span>
           </div>
         ) : !response ? (
           // Empty State
-          <div className="flex flex-col items-center justify-center py-12 gap-2 text-zinc-600 text-xs text-center">
+          <div className="flex flex-col items-center justify-center py-6 gap-2 text-zinc-600 text-xs text-center my-auto">
             <HelpCircle className="w-6 h-6 opacity-30 mb-1" />
             <span className="font-medium">No Request Fired</span>
             <span className="text-[10px] text-zinc-650">Enter a URL above and click "Send" to execute a call.</span>
           </div>
         ) : response.error ? (
           // Error State
-          <div className="bg-red-500/5 border border-red-500/15 p-4 rounded-lg flex gap-3 text-xs text-red-400 select-text max-h-[160px] overflow-auto">
+          <div className="bg-red-500/5 border border-red-500/15 p-4 rounded-lg flex gap-3 text-xs text-red-400 select-text my-auto max-h-full overflow-auto">
             <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 font-sans">
               <div className="font-semibold">Network Connection Failed</div>
               <div className="font-mono text-[10px] break-all leading-normal opacity-90">
                 {response.error}

@@ -622,33 +622,73 @@ function App() {
     setSaveReqModalOpen(false);
   };
 
-  // 14. Keyboard Shortcuts listener (Ctrl+Enter, Ctrl+S, Ctrl+N, ?)
+  // 14. Keyboard Shortcuts listener (Ctrl+Enter, Ctrl+S, Ctrl+N, ?, Ctrl+Alt+E, Ctrl+Shift+C, Ctrl+B, Alt+1-9)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Enter: Send HTTP Request
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         handleSend();
       }
+      // Ctrl+S: Save request
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         handleSaveLaunch();
       }
+      // Ctrl+N: New tab
       if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
         handleNewRequest();
       }
-      if (e.key === '?' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
-        setIsShortcutModalOpen(true);
+      // Ctrl+Alt+E: Manage Environments Modal
+      if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'e' || e.key === 'E')) {
+        e.preventDefault();
+        setEnvModalOpen((prev) => !prev);
       }
-    };
-    
-    const setIsShortcutModalOpen = (open: boolean) => {
-      setShortcutModalOpen(open);
+      // Ctrl+Shift+C: Generate Code Snippet Modal
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        setSnippetModalOpen((prev) => !prev);
+      }
+      // Ctrl+B: Toggle Sidebar collapse
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        setSidebarCollapsed((prev) => !prev);
+      }
+      // Alt+1 to Alt+9: Switch tabs
+      if (e.altKey && e.key >= '1' && e.key <= '9') {
+        const tabIndex = parseInt(e.key) - 1;
+        if (tabIndex < tabs.length) {
+          e.preventDefault();
+          switchTab(tabs[tabIndex].id);
+        }
+      }
+      // ?: Show cheatsheet
+      if (e.key === '?' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        setShortcutModalOpen(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [url, method, headers, params, bodyType, body, authType, authData, activeRequestMeta, collections, handleNewRequest]);
+  }, [
+    url,
+    method,
+    headers,
+    params,
+    bodyType,
+    body,
+    authType,
+    authData,
+    activeRequestMeta,
+    collections,
+    handleNewRequest,
+    envModalOpen,
+    snippetModalOpen,
+    sidebarCollapsed,
+    tabs,
+    switchTab,
+  ]);
 
   // Flatten helper
   const flattenCollections = (cols: Collection[], depth = 0): { id: string; name: string }[] => {
@@ -1161,6 +1201,21 @@ function App() {
 
             <div className="text-zinc-400">Ctrl + N</div>
             <div className="text-zinc-150">Open New Request Tab</div>
+
+            <div className="text-zinc-400">Ctrl + B</div>
+            <div className="text-zinc-150">Toggle Sidebar visibility</div>
+
+            <div className="text-zinc-400">Ctrl + Alt + E</div>
+            <div className="text-zinc-150">Manage Environments Modal</div>
+
+            <div className="text-zinc-400">Ctrl + Shift + C</div>
+            <div className="text-zinc-150">Generate Code Snippet Modal</div>
+
+            <div className="text-zinc-400">Alt + [1-9]</div>
+            <div className="text-zinc-150">Switch to Tab 1-9</div>
+
+            <div className="text-zinc-400">Escape</div>
+            <div className="text-zinc-150">Close active modal</div>
 
             <div className="text-zinc-400">?</div>
             <div className="text-zinc-150">Toggle Keyboard Shortcuts Menu</div>
