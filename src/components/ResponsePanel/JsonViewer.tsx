@@ -164,7 +164,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
       </div>
 
       {/* Viewer Panel */}
-      <div className="flex-1 overflow-auto border border-zinc-800 rounded-lg bg-zinc-950/40 p-3 max-h-[300px] min-h-[160px] font-mono text-xs select-text">
+      <div className="flex-1 overflow-auto border border-zinc-800 rounded-lg bg-zinc-950/40 p-3 min-h-[120px] font-mono text-xs select-text">
         {!body || body.trim() === '' ? (
           <div className="text-zinc-600 italic text-center py-12">
             No Response Body

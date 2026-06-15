@@ -39,7 +39,7 @@ export function ResponseHeaders({ headers }: ResponseHeadersProps) {
       )}
 
       {/* Headers Grid */}
-      <div className="flex-1 overflow-y-auto border border-zinc-800 rounded-lg bg-zinc-950/20 max-h-[220px]">
+      <div className="flex-1 overflow-y-auto border border-zinc-800 rounded-lg bg-zinc-950/20 min-h-[120px]">
         {filteredHeaders.length === 0 ? (
           <div className="text-center text-zinc-650 py-6 italic">
             No headers found.
