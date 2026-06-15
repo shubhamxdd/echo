@@ -11,6 +11,7 @@ import {
   FilePlus,
   Download,
   FolderInput,
+  Copy,
 } from 'lucide-react';
 
 interface CollectionTreeProps {
@@ -24,6 +25,8 @@ interface CollectionTreeProps {
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
+  onDuplicateFolder?: (id: string) => void;
+  onDuplicateRequest?: (id: string) => void;
 }
 
 export function CollectionTree({
@@ -37,6 +40,8 @@ export function CollectionTree({
   onDeleteRequest,
   onExportFolder,
   onMoveRequest,
+  onDuplicateFolder,
+  onDuplicateRequest,
 }: CollectionTreeProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -72,6 +77,18 @@ export function CollectionTree({
           className="group flex items-center justify-between py-1.5 hover:bg-zinc-800/40 rounded-md cursor-pointer transition-colors px-2 text-zinc-300 hover:text-zinc-100"
           style={{ paddingLeft: `${depth * 12 + 6}px` }}
           onClick={() => toggleExpand(col.id)}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }}
+          onDrop={async (e) => {
+            e.preventDefault();
+            const reqId = e.dataTransfer.getData('text/plain');
+            const sourceColId = e.dataTransfer.getData('sourceCollectionId');
+            if (reqId && sourceColId !== col.id) {
+              await onMoveRequest?.(reqId, col.id);
+            }
+          }}
         >
           <div className="flex items-center gap-1.5 overflow-hidden">
             <span className="text-zinc-500 hover:text-zinc-300">
@@ -139,6 +156,18 @@ export function CollectionTree({
 
             <div className="relative group/tooltip">
               <button
+                onClick={() => onDuplicateFolder?.(col.id)}
+                className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer flex items-center justify-center"
+              >
+                <Copy className="w-3 h-3" />
+              </button>
+              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                Duplicate collection
+              </span>
+            </div>
+
+            <div className="relative group/tooltip">
+              <button
                 onClick={() => onDeleteFolder(col.id)}
                 className="text-zinc-500 hover:text-red-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer"
               >
@@ -171,6 +200,11 @@ export function CollectionTree({
                     }`}
                     style={{ paddingLeft: `${(depth + 1) * 12 + 18}px` }}
                     onClick={() => onRequestSelect(req)}
+                    draggable={true}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', req.id);
+                      e.dataTransfer.setData('sourceCollectionId', req.collection_id);
+                    }}
                   >
                     <div className="flex items-center gap-2 overflow-hidden flex-1">
                       <span className={`text-[10px] w-8 truncate font-mono ${getMethodBadgeClass(req.method)}`}>
@@ -193,6 +227,18 @@ export function CollectionTree({
                         </button>
                         <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
                           Move Request
+                        </span>
+                      </div>
+
+                      <div className="relative group/tooltip">
+                        <button
+                          onClick={() => onDuplicateRequest?.(req.id)}
+                          className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800 cursor-pointer flex items-center justify-center"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-zinc-950 text-zinc-200 text-[9px] rounded shadow-md opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-800 font-medium">
+                          Duplicate Request
                         </span>
                       </div>
 

@@ -22,6 +22,8 @@ interface SidebarProps {
   onImportCollection: (data: any) => void;
   onHelpClick: () => void;
   onMoveRequest?: (requestId: string, currentCollectionId: string) => void;
+  onDuplicateFolder?: (id: string) => void;
+  onDuplicateRequest?: (id: string) => void;
 }
 
 export function Sidebar({
@@ -42,6 +44,8 @@ export function Sidebar({
   onImportCollection,
   onHelpClick,
   onMoveRequest,
+  onDuplicateFolder,
+  onDuplicateRequest,
 }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<'collections' | 'history'>('collections');
   const [searchQuery, setSearchQuery] = useState('');
@@ -210,6 +214,8 @@ export function Sidebar({
             onDeleteRequest={onDeleteRequest}
             onExportFolder={onExportFolder}
             onMoveRequest={onMoveRequest}
+            onDuplicateFolder={onDuplicateFolder}
+            onDuplicateRequest={onDuplicateRequest}
           />
         ) : (
           <HistoryList
