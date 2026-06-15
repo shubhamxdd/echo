@@ -12,7 +12,7 @@ Here is a guide on how to operate Echo and where to find key features:
 +--------------------------------------------------------------------------------+
 |  E  Echo   🔍 Filter collections...  [Env: No Environment ⚙️]  (☀️/🌙)  + New Tab  |  <- Top Bar
 +--------------------------------------------------------------------------------+
-|  COLLECTIONS  |  HISTORY            |  GET  https://api.example.com/users      |  <- Request URL Bar
+|  COLLECTIONS  |  HISTORY            |  GET  https://fakestoreapi.com/users     |  <- Request URL Bar
 +------------------------------------+-------------------------------------------+
 |  📂 Users Service                  |  Query Params | Headers | Body | Auth     |  <- Request Editors
 |    ├─ GET Get profile  [Copy] [X]  +-------------------------------------------+
