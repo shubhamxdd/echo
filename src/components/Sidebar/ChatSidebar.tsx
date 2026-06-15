@@ -38,6 +38,38 @@ interface ChatMessage {
   timestamp: number;
 }
 
+type AIProvider = 'gemini' | 'openai' | 'openrouter' | 'custom';
+
+const getDefaultModel = (p: AIProvider): string => {
+  switch (p) {
+    case 'gemini':
+      return 'gemini-2.5-flash';
+    case 'openai':
+      return 'gpt-4o-mini';
+    case 'openrouter':
+      return 'google/gemini-2.5-flash';
+    case 'custom':
+      return 'llama3';
+    default:
+      return '';
+  }
+};
+
+const getDefaultBaseUrl = (p: AIProvider): string => {
+  switch (p) {
+    case 'gemini':
+      return '';
+    case 'openai':
+      return 'https://api.openai.com/v1';
+    case 'openrouter':
+      return 'https://openrouter.ai/api/v1';
+    case 'custom':
+      return 'http://localhost:11434/v1';
+    default:
+      return '';
+  }
+};
+
 export function ChatSidebar({
   activeRequestMeta,
   method,
@@ -53,8 +85,18 @@ export function ChatSidebar({
   activeEnvVariables,
   onClose,
 }: ChatSidebarProps) {
+  // Active Running Config
+  const [provider, setProvider] = useState<AIProvider>('gemini');
+  const [model, setModel] = useState<string>('gemini-2.5-flash');
+  const [baseUrl, setBaseUrl] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
-  const [tempKey, setTempKey] = useState<string>('');
+
+  // Temp Form Config
+  const [tempProvider, setTempProvider] = useState<AIProvider>('gemini');
+  const [tempModel, setTempModel] = useState<string>('gemini-2.5-flash');
+  const [tempBaseUrl, setTempBaseUrl] = useState<string>('');
+  const [tempApiKey, setTempApiKey] = useState<string>('');
+
   const [showConfig, setShowConfig] = useState<boolean>(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
@@ -63,13 +105,24 @@ export function ChatSidebar({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load API Key from local storage on mount
+  // Load configuration from local storage on mount
   useEffect(() => {
-    const savedKey = localStorage.getItem('echo_gemini_api_key');
-    if (savedKey) {
-      setApiKey(savedKey);
-      setTempKey(savedKey);
-    } else {
+    const savedProvider = (localStorage.getItem('echo_ai_provider') as AIProvider) || 'gemini';
+    const savedModel = localStorage.getItem(`echo_ai_model_${savedProvider}`) || getDefaultModel(savedProvider);
+    const savedBaseUrl = localStorage.getItem(`echo_ai_url_${savedProvider}`) || getDefaultBaseUrl(savedProvider);
+    const savedKey = localStorage.getItem(`echo_ai_key_${savedProvider}`) || '';
+
+    setProvider(savedProvider);
+    setTempProvider(savedProvider);
+    setModel(savedModel);
+    setTempModel(savedModel);
+    setBaseUrl(savedBaseUrl);
+    setTempBaseUrl(savedBaseUrl);
+    setApiKey(savedKey);
+    setTempApiKey(savedKey);
+
+    // If no key is configured and not using a local custom endpoint, show settings
+    if (!savedKey && savedProvider !== 'custom') {
       setShowConfig(true);
     }
 
@@ -96,19 +149,37 @@ export function ChatSidebar({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSaveApiKey = (e: React.FormEvent) => {
+  const handleProviderChange = (newP: AIProvider) => {
+    setTempProvider(newP);
+    
+    // Autofill defaults or pull from local storage
+    const defaultModel = localStorage.getItem(`echo_ai_model_${newP}`) || getDefaultModel(newP);
+    const defaultUrl = localStorage.getItem(`echo_ai_url_${newP}`) || getDefaultBaseUrl(newP);
+    const savedKey = localStorage.getItem(`echo_ai_key_${newP}`) || '';
+
+    setTempModel(defaultModel);
+    setTempBaseUrl(defaultUrl);
+    setTempApiKey(savedKey);
+  };
+
+  const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tempKey.trim()) return;
-    localStorage.setItem('echo_gemini_api_key', tempKey.trim());
-    setApiKey(tempKey.trim());
+
+    localStorage.setItem('echo_ai_provider', tempProvider);
+    localStorage.setItem(`echo_ai_model_${tempProvider}`, tempModel.trim());
+    localStorage.setItem(`echo_ai_url_${tempProvider}`, tempBaseUrl.trim());
+    localStorage.setItem(`echo_ai_key_${tempProvider}`, tempApiKey.trim());
+
+    setProvider(tempProvider);
+    setModel(tempModel.trim());
+    setBaseUrl(tempBaseUrl.trim());
+    setApiKey(tempApiKey.trim());
+
     setShowConfig(false);
     setErrorMsg(null);
   };
 
-  const handleResetApiKey = () => {
-    localStorage.removeItem('echo_gemini_api_key');
-    setApiKey('');
-    setTempKey('');
+  const handleResetConfig = () => {
     setShowConfig(true);
   };
 
@@ -169,7 +240,8 @@ export function ChatSidebar({
 
   const handleSendMessage = async (customPrompt?: string) => {
     const query = customPrompt || inputValue;
-    if (!query.trim() || loading || !apiKey) return;
+    if (!query.trim() || loading) return;
+    if (!apiKey && provider !== 'custom') return; // Custom endpoints might not require keys
 
     setErrorMsg(null);
     const userMessage: ChatMessage = {
@@ -183,51 +255,101 @@ export function ChatSidebar({
     setLoading(true);
 
     try {
-      // Build history for Gemini (alternating role payloads)
-      // Format context block and attach it ONLY to the latest user prompt
       const context = formatWorkspaceContext();
-      
-      const contentsPayload = messages.map((m) => ({
-        role: m.role,
-        parts: [{ text: m.text }],
-      }));
+      let answerText = '';
 
-      // Push latest user prompt containing active workspace details
-      contentsPayload.push({
-        role: 'user',
-        parts: [{ text: query + context }],
-      });
+      if (provider === 'gemini') {
+        // --- Gemini Native API Format ---
+        const contentsPayload = messages.map((m) => ({
+          role: m.role,
+          parts: [{ text: m.text }],
+        }));
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: contentsPayload,
-            systemInstruction: {
-              parts: [
-                {
-                  text: 'You are Echo AI, a context-aware developer assistant built into Echo (a desktop API client). You help developers test, write, and debug HTTP API requests. Always be concise, helpful, and provide code blocks or assertions with clean syntax. When asked to write assertions, refer to the Echo SavedRequest assertion model format.',
-                },
-              ],
+        contentsPayload.push({
+          role: 'user',
+          parts: [{ text: query + context }],
+        });
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          }),
-        }
-      );
+            body: JSON.stringify({
+              contents: contentsPayload,
+              systemInstruction: {
+                parts: [
+                  {
+                    text: 'You are Echo AI, a context-aware developer assistant built into Echo (a desktop API client). You help developers test, write, and debug HTTP API requests. Always be concise, helpful, and provide code blocks or assertions with clean syntax. When asked to write assertions, refer to the Echo SavedRequest assertion model format.',
+                  },
+                ],
+              },
+            }),
+          }
+        );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `Request failed with code ${response.status}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `Request failed with code ${response.status}`);
+        }
+
+        const data = await response.json();
+        answerText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      } else {
+        // --- OpenAI Compatible API Format (OpenAI, OpenRouter, Custom) ---
+        const messagesPayload = [
+          {
+            role: 'system',
+            content: 'You are Echo AI, a context-aware developer assistant built into Echo (a desktop API client). You help developers test, write, and debug HTTP API requests. Always be concise, helpful, and provide code blocks or assertions with clean syntax. When asked to write assertions, refer to the Echo SavedRequest assertion model format.',
+          },
+          ...messages.map((m) => ({
+            role: m.role === 'model' ? 'assistant' : 'user',
+            content: m.text,
+          })),
+          {
+            role: 'user',
+            content: query + context,
+          },
+        ];
+
+        const headersObj: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (apiKey) {
+          headersObj['Authorization'] = `Bearer ${apiKey}`;
+        }
+
+        // OpenRouter requirements
+        if (provider === 'openrouter') {
+          headersObj['HTTP-Referer'] = 'http://localhost:1420';
+          headersObj['X-Title'] = 'Echo Client';
+        }
+
+        const endpointUrl = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+
+        const response = await fetch(endpointUrl, {
+          method: 'POST',
+          headers: headersObj,
+          body: JSON.stringify({
+            model: model,
+            messages: messagesPayload,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `Request failed with code ${response.status}`);
+        }
+
+        const data = await response.json();
+        answerText = data.choices?.[0]?.message?.content || '';
       }
 
-      const data = await response.json();
-      const answerText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
       if (!answerText) {
-        throw new Error('Received an empty response from Gemini API.');
+        throw new Error('Received an empty response from the AI provider.');
       }
 
       const modelMessage: ChatMessage = {
@@ -239,7 +361,7 @@ export function ChatSidebar({
       setMessages((prev) => [...prev, modelMessage]);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'An error occurred while calling the Gemini API.');
+      setErrorMsg(err.message || 'An error occurred while communicating with the AI provider.');
     } finally {
       setLoading(false);
     }
@@ -296,13 +418,46 @@ export function ChatSidebar({
     });
   };
 
+  const hasConfiguredKey = () => {
+    if (provider === 'custom') return true; // Local host typically doesn't need key
+    return !!apiKey;
+  };
+
+  const getProviderLink = () => {
+    switch (tempProvider) {
+      case 'gemini':
+        return 'https://aistudio.google.com/app/apikey';
+      case 'openai':
+        return 'https://platform.openai.com/api-keys';
+      case 'openrouter':
+        return 'https://openrouter.ai/keys';
+      default:
+        return null;
+    }
+  };
+
+  const getProviderLinkText = () => {
+    switch (tempProvider) {
+      case 'gemini':
+        return 'Get Gemini API Key';
+      case 'openai':
+        return 'Get OpenAI API Key';
+      case 'openrouter':
+        return 'Get OpenRouter API Key';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-zinc-900 border-l border-zinc-800 select-none">
       {/* Header bar */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
-          <span className="font-semibold text-xs text-zinc-100">Echo AI Assistant</span>
+          <span className="font-semibold text-xs text-zinc-100">
+            Echo AI ({provider === 'custom' ? 'Custom' : provider.toUpperCase()})
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -335,46 +490,96 @@ export function ChatSidebar({
       {/* Main Panel Content */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         {showConfig ? (
-          /* API Key Setup View */
-          <div className="absolute inset-0 bg-zinc-900 p-5 flex flex-col justify-center items-center z-10 text-center select-text">
-            <div className="w-10 h-10 bg-orange-600/10 rounded-full flex items-center justify-center text-orange-500 mb-3">
-              <Key className="w-5 h-5" />
+          /* Multi-Provider Setup View */
+          <div className="absolute inset-0 bg-zinc-900 p-5 flex flex-col justify-start items-center z-10 overflow-y-auto select-text scrollbar-thin">
+            <div className="w-9 h-9 bg-orange-600/10 rounded-full flex items-center justify-center text-orange-500 mb-2 mt-4 shrink-0">
+              <Key className="w-4.5 h-4.5" />
             </div>
-            <h3 className="text-sm font-semibold text-zinc-100 mb-1">Gemini API Connection</h3>
-            <p className="text-xs text-zinc-400 max-w-[240px] leading-relaxed mb-4">
-              Echo inspects active endpoints to build tests, document payloads, and write mock scripts. Paste your key below to connect.
+            <h3 className="text-sm font-semibold text-zinc-100 mb-1 shrink-0">AI Assistant Settings</h3>
+            <p className="text-[11px] text-zinc-400 max-w-[240px] leading-relaxed mb-4 text-center shrink-0">
+              Connect Echo to your preferred AI model to automatically build tests, check schemas, and draft script helpers.
             </p>
 
-            <form onSubmit={handleSaveApiKey} className="w-full max-w-[240px] space-y-3">
-              <input
-                type="password"
-                placeholder="Paste Gemini API Key..."
-                value={tempKey}
-                onChange={(e) => setTempKey(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-700 transition-colors text-center"
-              />
+            <form onSubmit={handleSaveConfig} className="w-full max-w-[240px] space-y-3">
+              {/* Provider Selector */}
+              <div className="space-y-1 text-left">
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-0.5">Provider</label>
+                <select
+                  value={tempProvider}
+                  onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md px-3 py-1.5 text-xs text-zinc-200 cursor-pointer"
+                >
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openrouter">OpenRouter (Llama/Claude/etc.)</option>
+                  <option value="openai">OpenAI (GPT-4o/mini)</option>
+                  <option value="custom">Custom (Ollama/Groq/etc.)</option>
+                </select>
+              </div>
+
+              {/* Custom Base URL (visible only for custom) */}
+              {tempProvider === 'custom' && (
+                <div className="space-y-1 text-left animate-fadeIn">
+                  <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-0.5">Base URL</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. http://localhost:11434/v1"
+                    value={tempBaseUrl}
+                    onChange={(e) => setTempBaseUrl(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-700"
+                  />
+                </div>
+              )}
+
+              {/* Model Name */}
+              <div className="space-y-1 text-left">
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-0.5">Model Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. gpt-4o-mini"
+                  value={tempModel}
+                  onChange={(e) => setTempModel(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-700"
+                />
+              </div>
+
+              {/* API Key */}
+              <div className="space-y-1 text-left">
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-0.5">
+                  API Key {tempProvider === 'custom' && '(Optional)'}
+                </label>
+                <input
+                  type="password"
+                  placeholder={tempProvider === 'custom' ? 'No key required' : 'Enter API Key...'}
+                  value={tempApiKey}
+                  onChange={(e) => setTempApiKey(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md px-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-700"
+                />
+              </div>
+
               <button
                 type="submit"
-                disabled={!tempKey.trim()}
-                className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium text-xs py-1.5 rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:hover:bg-orange-600"
+                disabled={!tempApiKey.trim() && tempProvider !== 'custom'}
+                className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium text-xs py-1.5 rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:hover:bg-orange-600 mt-2"
               >
                 Save & Connect
               </button>
             </form>
 
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 flex items-center gap-1 text-[10px] text-orange-400 hover:text-orange-300 transition-colors font-medium"
-            >
-              Get a Free Gemini API Key <ExternalLink className="w-2.5 h-2.5" />
-            </a>
+            {getProviderLink() && (
+              <a
+                href={getProviderLink()!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 flex items-center gap-1 text-[10px] text-orange-400 hover:text-orange-300 transition-colors font-medium shrink-0"
+              >
+                {getProviderLinkText()} <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            )}
 
-            {apiKey && (
+            {hasConfiguredKey() && (
               <button
                 onClick={() => setShowConfig(false)}
-                className="mt-8 text-[10px] text-zinc-500 hover:text-zinc-350 underline transition-colors cursor-pointer"
+                className="mt-6 text-[10px] text-zinc-500 hover:text-zinc-350 underline transition-colors cursor-pointer shrink-0 pb-4"
               >
                 Go back to chat
               </button>
@@ -398,13 +603,13 @@ export function ChatSidebar({
                 </span>
                 <button
                   onClick={() => handleSendMessage('Generate standard assertions for this request')}
-                  className="w-full text-left text-[10px] bg-zinc-950 border border-zinc-800/80 hover:border-orange-500/50 hover:bg-orange-950/5 text-zinc-400 hover:text-zinc-200 p-2 rounded-md transition-all cursor-pointer font-medium"
+                  className="w-full text-left text-[10px] bg-zinc-950 border border-zinc-800/80 hover:border-orange-500/50 hover:bg-orange-950/5 text-zinc-450 hover:text-zinc-200 p-2 rounded-md transition-all cursor-pointer font-medium"
                 >
                   "Generate response assertions..."
                 </button>
                 <button
                   onClick={() => handleSendMessage('Analyze the response body and document the schema')}
-                  className="w-full text-left text-[10px] bg-zinc-950 border border-zinc-800/80 hover:border-orange-500/50 hover:bg-orange-950/5 text-zinc-400 hover:text-zinc-200 p-2 rounded-md transition-all cursor-pointer font-medium"
+                  className="w-full text-left text-[10px] bg-zinc-950 border border-zinc-800/80 hover:border-orange-500/50 hover:bg-orange-950/5 text-zinc-450 hover:text-zinc-200 p-2 rounded-md transition-all cursor-pointer font-medium"
                 >
                   "Analyze response body schema..."
                 </button>
@@ -443,17 +648,17 @@ export function ChatSidebar({
               <p className="font-semibold mb-1">API Request Failed</p>
               <p className="leading-relaxed">{errorMsg}</p>
               <button
-                onClick={handleResetApiKey}
+                onClick={handleResetConfig}
                 className="mt-2 text-[10px] text-orange-400 hover:underline font-bold cursor-pointer"
               >
-                Change API Key
+                Change API Settings
               </button>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Floating Context Pill Helpers (only visible if there is active response/request) */}
+        {/* Floating Context Pill Helpers (only visible if configuration is valid) */}
         {!showConfig && (
           <div className="px-3 py-1.5 flex gap-1.5 overflow-x-auto no-scrollbar border-t border-zinc-800/50 bg-zinc-900/60 shrink-0">
             <button
@@ -493,16 +698,16 @@ export function ChatSidebar({
             <div className="relative flex items-center">
               <input
                 type="text"
-                placeholder={apiKey ? "Ask Echo AI assistant..." : "Settings -> Add API Key"}
+                placeholder={hasConfiguredKey() ? "Ask Echo AI assistant..." : "Settings -> Add API Key"}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                disabled={loading || !apiKey}
+                disabled={loading || !hasConfiguredKey()}
                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md py-2 pl-3 pr-10 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
               />
               <button
                 onClick={() => handleSendMessage()}
-                disabled={loading || !inputValue.trim() || !apiKey}
+                disabled={loading || !inputValue.trim() || !hasConfiguredKey()}
                 className="absolute right-1.5 p-1 rounded hover:bg-zinc-800 text-zinc-450 hover:text-orange-500 transition-all disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-zinc-450 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />

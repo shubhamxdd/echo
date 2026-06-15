@@ -63,7 +63,7 @@ Here is a guide on how to operate Echo and where to find key features:
 ### 7. Collapsible AI Assistant (Right Sidebar)
 * **AI Chatbot**: Click the **Sparkles** icon in the Top Header Bar to toggle the context-aware AI chatbot assistant.
 * **Context Integration**: The chatbot automatically analyzes the active request parameters, environment variables, headers, and response payloads to help you generate assertions, write integration code snippets, explain payload schemas, and diagnose errors.
-* **Gemini Support**: Paste your Gemini API key (stored securely in your local browser storage) to get started. Includes quick-trigger command macro buttons.
+* **Multi-Provider Support**: Supports multiple AI engines including Google Gemini, OpenAI, OpenRouter (accessing Claude, Llama, and more), or custom OpenAI-compatible local/remote endpoints (such as local Ollama instances). API keys and endpoints are managed securely and separately per-provider. Includes quick-trigger command macro buttons.
 
 ---
 
