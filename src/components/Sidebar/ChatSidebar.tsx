@@ -39,6 +39,13 @@ interface ChatMessage {
   timestamp: number;
 }
 
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  created_at: number;
+}
+
 type AIProvider = 'gemini' | 'openai' | 'openrouter' | 'custom';
 
 const getDefaultModel = (p: AIProvider): string => {
@@ -99,15 +106,23 @@ export function ChatSidebar({
   const [tempApiKey, setTempApiKey] = useState<string>('');
 
   const [showConfig, setShowConfig] = useState<boolean>(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Multi-Chat Sessions State
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string>('');
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load configuration from local storage on mount
+  // Derived Active Session Details
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
+  const messages = activeSession ? activeSession.messages : [];
+
+  // Load configuration and chat sessions from local storage on mount
   useEffect(() => {
+    // 1. Load AI Config
     const savedProvider = (localStorage.getItem('echo_ai_provider') as AIProvider) || 'gemini';
     const savedModel = localStorage.getItem(`echo_ai_model_${savedProvider}`) || getDefaultModel(savedProvider);
     const savedBaseUrl = localStorage.getItem(`echo_ai_url_${savedProvider}`) || getDefaultBaseUrl(savedProvider);
@@ -122,27 +137,55 @@ export function ChatSidebar({
     setApiKey(savedKey);
     setTempApiKey(savedKey);
 
-    // If no key is configured and not using a local custom endpoint, show settings
     if (!savedKey && savedProvider !== 'custom') {
       setShowConfig(true);
     }
 
-    // Load saved messages if any (per conversation)
-    const savedMessages = localStorage.getItem('echo_chat_history');
-    if (savedMessages) {
+    // 2. Load Chat Sessions
+    const savedSessions = localStorage.getItem('echo_chat_sessions');
+    let parsedSessions: ChatSession[] = [];
+    if (savedSessions) {
       try {
-        setMessages(JSON.parse(savedMessages));
+        parsedSessions = JSON.parse(savedSessions);
       } catch (_) {}
     }
+
+    // Fallback if no sessions exist
+    if (parsedSessions.length === 0) {
+      const initialId = crypto.randomUUID();
+      parsedSessions = [{
+        id: initialId,
+        title: 'New Chat',
+        messages: [],
+        created_at: Date.now()
+      }];
+    }
+
+    setSessions(parsedSessions);
+
+    // 3. Load Active Session ID
+    const savedActiveId = localStorage.getItem('echo_active_chat_id');
+    const isValidActiveId = parsedSessions.some(s => s.id === savedActiveId);
+    setActiveSessionId(isValidActiveId && savedActiveId ? savedActiveId : parsedSessions[0].id);
   }, []);
 
-  // Save messages to local storage whenever history updates
+  // Save sessions to local storage whenever they change
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('echo_chat_history', JSON.stringify(messages));
-    } else {
-      localStorage.removeItem('echo_chat_history');
+    if (sessions.length > 0) {
+      localStorage.setItem('echo_chat_sessions', JSON.stringify(sessions));
     }
+  }, [sessions]);
+
+  // Save active session ID
+  useEffect(() => {
+    if (activeSessionId) {
+      localStorage.setItem('echo_active_chat_id', activeSessionId);
+    }
+    scrollToBottom();
+  }, [activeSessionId]);
+
+  // Auto-scroll on new messages
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
@@ -153,7 +196,6 @@ export function ChatSidebar({
   const handleProviderChange = (newP: AIProvider) => {
     setTempProvider(newP);
     
-    // Autofill defaults or pull from local storage
     const defaultModel = localStorage.getItem(`echo_ai_model_${newP}`) || getDefaultModel(newP);
     const defaultUrl = localStorage.getItem(`echo_ai_url_${newP}`) || getDefaultBaseUrl(newP);
     const savedKey = localStorage.getItem(`echo_ai_key_${newP}`) || '';
@@ -184,10 +226,68 @@ export function ChatSidebar({
     setShowConfig(true);
   };
 
-  const handleClearChat = () => {
-    if (confirm('Are you sure you want to clear your conversation history?')) {
-      setMessages([]);
+  // Multi-Chat Helper Actions
+  const handleCreateSession = () => {
+    const newId = crypto.randomUUID();
+    const newSession: ChatSession = {
+      id: newId,
+      title: `Chat ${sessions.length + 1}`,
+      messages: [],
+      created_at: Date.now()
+    };
+    setSessions((prev) => [newSession, ...prev]);
+    setActiveSessionId(newId);
+    setErrorMsg(null);
+  };
+
+  const handleDeleteSession = (id: string) => {
+    if (confirm('Delete this chat session?')) {
+      const updated = sessions.filter(s => s.id !== id);
+      if (updated.length === 0) {
+        const initialId = crypto.randomUUID();
+        setSessions([{
+          id: initialId,
+          title: 'New Chat',
+          messages: [],
+          created_at: Date.now()
+        }]);
+        setActiveSessionId(initialId);
+      } else {
+        setSessions(updated);
+        if (activeSessionId === id) {
+          setActiveSessionId(updated[0].id);
+        }
+      }
+      setErrorMsg(null);
     }
+  };
+
+  const addMessageToActiveSession = (msg: ChatMessage) => {
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id === activeSessionId) {
+          const updatedMessages = [...s.messages, msg];
+
+          // Auto-rename chat title if it's the first user message
+          let updatedTitle = s.title;
+          if (s.title === 'New Chat' || s.title.startsWith('Chat ')) {
+            const firstUserMsg = updatedMessages.find((m) => m.role === 'user');
+            if (firstUserMsg) {
+              updatedTitle =
+                firstUserMsg.text.substring(0, 22) +
+                (firstUserMsg.text.length > 22 ? '...' : '');
+            }
+          }
+
+          return {
+            ...s,
+            title: updatedTitle,
+            messages: updatedMessages,
+          };
+        }
+        return s;
+      })
+    );
   };
 
   const formatWorkspaceContext = (): string => {
@@ -242,7 +342,7 @@ export function ChatSidebar({
   const handleSendMessage = async (customPrompt?: string) => {
     const query = customPrompt || inputValue;
     if (!query.trim() || loading) return;
-    if (!apiKey && provider !== 'custom') return; // Custom endpoints might not require keys
+    if (!apiKey && provider !== 'custom') return;
 
     setErrorMsg(null);
     const userMessage: ChatMessage = {
@@ -251,7 +351,7 @@ export function ChatSidebar({
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessageToActiveSession(userMessage);
     if (!customPrompt) setInputValue('');
     setLoading(true);
 
@@ -326,7 +426,6 @@ export function ChatSidebar({
           headersObj['x-api-key'] = apiKey;
         }
 
-        // OpenRouter requirements
         if (provider === 'openrouter') {
           headersObj['HTTP-Referer'] = 'http://localhost:1420';
           headersObj['X-Title'] = 'Echo Client';
@@ -362,7 +461,7 @@ export function ChatSidebar({
         timestamp: Date.now(),
       };
 
-      setMessages((prev) => [...prev, modelMessage]);
+      addMessageToActiveSession(modelMessage);
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'An error occurred while communicating with the AI provider.');
@@ -372,7 +471,6 @@ export function ChatSidebar({
   };
 
   const renderMarkdown = (text: string) => {
-    // Basic Markdown regex parser (safe, fast, zero-dependency)
     const parts = text.split(/(```[\s\S]*?```)/g);
     return parts.map((part, index) => {
       if (part.startsWith('```')) {
@@ -423,7 +521,7 @@ export function ChatSidebar({
   };
 
   const hasConfiguredKey = () => {
-    if (provider === 'custom') return true; // Local host typically doesn't need key
+    if (provider === 'custom') return true;
     return !!apiKey;
   };
 
@@ -457,13 +555,32 @@ export function ChatSidebar({
     <div className="flex flex-col h-full bg-zinc-900 border-l border-zinc-800 select-none">
       {/* Header bar */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-orange-500 animate-pulse" />
-          <span className="font-semibold text-xs text-zinc-100">
-            Echo AI ({provider === 'custom' ? 'Custom' : provider.toUpperCase()})
-          </span>
+        <div className="flex items-center gap-1.5 overflow-hidden flex-1 mr-2">
+          <Sparkles className="w-4 h-4 text-orange-500 shrink-0" />
+          <select
+            value={activeSessionId}
+            onChange={(e) => {
+              setActiveSessionId(e.target.value);
+              setErrorMsg(null);
+            }}
+            className="bg-transparent text-[11px] text-zinc-100 border-none outline-none focus:ring-0 truncate cursor-pointer font-semibold py-0.5 max-w-[140px]"
+            title="Switch Chat Session"
+          >
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id} className="bg-zinc-900 text-zinc-350">
+                {s.title}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleCreateSession}
+            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 cursor-pointer transition-colors"
+            title="New Chat Session"
+          >
+            <span className="text-xs font-bold font-mono text-zinc-400 hover:text-orange-400">+</span>
+          </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setShowConfig(!showConfig)}
             className={`p-1 rounded hover:bg-zinc-800 cursor-pointer transition-colors ${
@@ -474,10 +591,9 @@ export function ChatSidebar({
             <Settings className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={handleClearChat}
-            disabled={messages.length === 0}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer transition-colors"
-            title="Clear Chat History"
+            onClick={() => handleDeleteSession(activeSessionId)}
+            className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-red-400 cursor-pointer transition-colors"
+            title="Delete Current Chat"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
