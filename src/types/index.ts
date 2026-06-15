@@ -61,3 +61,11 @@ export interface HttpResponse {
   body: string;
   error: string | null;
 }
+
+export interface Environment {
+  id: string;
+  name: string;
+  variables: KeyValueItem[];
+  created_at: number;
+  updated_at: number;
+}
