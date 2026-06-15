@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HttpResponse, KeyValueItem } from '../../types';
 import { fetch } from '@tauri-apps/plugin-http';
 import { useAlertDialog } from '../common/AlertDialog';
+import ReactMarkdown from 'react-markdown';
 import {
   Send,
   Sparkles,
@@ -510,53 +511,68 @@ export function ChatSidebar({
   };
 
   const renderMarkdown = (text: string) => {
-    const parts = text.split(/(```[\s\S]*?```)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('```')) {
-        const match = part.match(/```(\w*)\n([\s\S]*?)```/);
-        const language = match ? match[1] : '';
-        const code = match ? match[2] : part.slice(3, -3);
-        return (
-          <div key={index} className="my-2.5 bg-zinc-950 rounded-md border border-zinc-800/80 overflow-hidden font-mono text-[11px] w-full">
-            <div className="flex justify-between items-center bg-zinc-900/50 px-3 py-1.5 text-zinc-500 border-b border-zinc-850">
-              <span className="text-[9px] uppercase font-bold text-zinc-400">{language || 'code'}</span>
-              <button
-                onClick={() => navigator.clipboard.writeText(code.trim())}
-                className="text-[9px] hover:text-orange-400 transition-colors cursor-pointer font-medium"
-              >
-                Copy
-              </button>
+    return (
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p className="text-[11.5px] text-zinc-200 leading-relaxed mb-2 last:mb-0 select-text">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-4 text-[11px] text-zinc-200 space-y-1 mb-2 select-text">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-4 text-[11px] text-zinc-200 space-y-1 mb-2 select-text">{children}</ol>,
+          li: ({ children }) => <li className="text-[11px] text-zinc-200 select-text">{children}</li>,
+          strong: ({ children }) => <strong className="font-bold text-zinc-100">{children}</strong>,
+          em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
+          h1: ({ children }) => <h1 className="text-xs font-bold text-zinc-100 mt-3 mb-1 select-text">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-[11px] font-bold text-zinc-150 mt-2.5 mb-1 select-text">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-[10px] font-bold text-zinc-200 mt-2 mb-0.5 select-text">{children}</h3>,
+          a: ({ href, children }) => (
+            <a href={href} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-350 hover:underline cursor-pointer inline-flex items-center gap-0.5">
+              {children}
+            </a>
+          ),
+          table: ({ children }) => (
+            <div className="overflow-x-auto my-2 rounded border border-zinc-800 max-w-full">
+              <table className="w-full border-collapse text-[10px] text-zinc-350">{children}</table>
             </div>
-            <pre className="p-3 overflow-x-auto text-zinc-300 select-text scrollbar-thin">
-              <code>{code.trim()}</code>
-            </pre>
-          </div>
-        );
-      }
-
-      const inlineParts = part.split(/(`[^`\n]+`)/g);
-      return (
-        <span key={index} className="whitespace-pre-line select-text text-zinc-200">
-          {inlineParts.map((subPart, subIndex) => {
-            if (subPart.startsWith('`') && subPart.endsWith('`')) {
+          ),
+          thead: ({ children }) => <thead className="bg-zinc-950 text-zinc-200 font-bold border-b border-zinc-800">{children}</thead>,
+          tbody: ({ children }) => <tbody className="divide-y divide-zinc-800/40">{children}</tbody>,
+          tr: ({ children }) => <tr>{children}</tr>,
+          th: ({ children }) => <th className="px-2 py-1 text-left border-r border-zinc-800 last:border-r-0 font-semibold">{children}</th>,
+          td: ({ children }) => <td className="px-2 py-1 border-r border-zinc-800 last:border-r-0 text-zinc-300 font-normal">{children}</td>,
+          code({ className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const codeVal = String(children).replace(/\n$/, '');
+            const isInline = !match && !codeVal.includes('\n') && codeVal.length < 100;
+            
+            if (isInline) {
               return (
-                <code key={subIndex} className="px-1.5 py-0.5 bg-zinc-950 text-orange-400 rounded font-mono text-[11px] border border-zinc-850 mx-0.5">
-                  {subPart.slice(1, -1)}
+                <code className="px-1.5 py-0.5 bg-zinc-950 text-orange-400 rounded font-mono text-[10.5px] border border-zinc-850 mx-0.5" {...props}>
+                  {codeVal}
                 </code>
               );
             }
 
-            const boldParts = subPart.split(/(\*\*[^*]+\*\*)/g);
-            return boldParts.map((boldPart, boldIndex) => {
-              if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-                return <strong key={boldIndex} className="font-bold text-zinc-100">{boldPart.slice(2, -2)}</strong>;
-              }
-              return boldPart;
-            });
-          })}
-        </span>
-      );
-    });
+            return (
+              <div className="my-2 bg-zinc-950 rounded-md border border-zinc-800/80 overflow-hidden font-mono text-[11px] w-full">
+                <div className="flex justify-between items-center bg-zinc-900/50 px-3 py-1 text-zinc-500 border-b border-zinc-850">
+                  <span className="text-[9px] uppercase font-bold text-zinc-400">{match ? match[1] : 'code'}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(codeVal)}
+                    className="text-[9px] hover:text-orange-400 transition-colors cursor-pointer font-medium"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre className="p-2.5 overflow-x-auto text-zinc-300 select-text scrollbar-thin">
+                  <code>{codeVal}</code>
+                </pre>
+              </div>
+            );
+          }
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    );
   };
 
   const hasConfiguredKey = () => {
