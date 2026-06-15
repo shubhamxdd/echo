@@ -3,6 +3,7 @@ import { HttpResponse, KeyValueItem } from '../../types';
 import { fetch } from '@tauri-apps/plugin-http';
 import { useAlertDialog } from '../common/AlertDialog';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Send,
   Sparkles,
@@ -513,6 +514,7 @@ export function ChatSidebar({
   const renderMarkdown = (text: string) => {
     return (
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           p: ({ children }) => <p className="text-[11.5px] text-zinc-200 leading-relaxed mb-2 last:mb-0 select-text">{children}</p>,
           ul: ({ children }) => <ul className="list-disc pl-4 text-[11px] text-zinc-200 space-y-1 mb-2 select-text">{children}</ul>,
