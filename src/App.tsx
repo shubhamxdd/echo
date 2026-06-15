@@ -173,6 +173,85 @@ function App() {
     };
   }, [isResizing, resize, stopResizing]);
 
+  // Guided Tour Workspace Simulation State
+  const workspaceStateRef = useRef({
+    method: 'GET',
+    url: '',
+    headers: [{ key: '', value: '', enabled: true }] as KeyValueItem[],
+    params: [{ key: '', value: '', enabled: true }] as KeyValueItem[],
+    bodyType: 'none' as 'none' | 'raw' | 'json' | 'form',
+    body: '',
+    authType: 'none' as 'none' | 'bearer' | 'basic' | 'apikey',
+    authData: {} as any,
+    activeResponse: null as HttpResponse | null,
+  });
+
+  // Backup active request fields before tour modifies them
+  useEffect(() => {
+    if (!tourOpen) {
+      workspaceStateRef.current = {
+        method,
+        url,
+        headers,
+        params,
+        bodyType,
+        body,
+        authType,
+        authData,
+        activeResponse,
+      };
+    }
+  }, [method, url, headers, params, bodyType, body, authType, authData, activeResponse, tourOpen]);
+
+  // Load tour demonstration mock data on open and restore on close
+  useEffect(() => {
+    if (tourOpen) {
+      setMethod('GET');
+      setUrl('https://api.echo-rest.com/v1/users');
+      setParams([
+        { key: 'limit', value: '10', enabled: true },
+        { key: 'status', value: 'active', enabled: true }
+      ]);
+      setHeaders([
+        { key: 'Accept', value: 'application/json', enabled: true },
+        { key: '', value: '', enabled: true }
+      ]);
+      setBodyType('none');
+      setBody('');
+      setAuthType('none');
+      setAuthData({});
+      setActiveResponse({
+        status: 200,
+        statusText: 'OK',
+        duration_ms: 42,
+        headers: [
+          { key: 'Content-Type', value: 'application/json', enabled: true },
+          { key: 'Server', value: 'Echo/1.0.0', enabled: true }
+        ],
+        body: JSON.stringify({
+          status: "success",
+          results: 2,
+          users: [
+            { id: 1, name: "Alice", role: "Admin" },
+            { id: 2, name: "Bob", role: "Developer" }
+          ]
+        }, null, 2),
+        error: null,
+      });
+    } else {
+      const backup = workspaceStateRef.current;
+      setMethod(backup.method);
+      setUrl(backup.url);
+      setHeaders(backup.headers);
+      setParams(backup.params);
+      setBodyType(backup.bodyType);
+      setBody(backup.body);
+      setAuthType(backup.authType);
+      setAuthData(backup.authData);
+      setActiveResponse(backup.activeResponse);
+    }
+  }, [tourOpen]);
+
   // 2. Initialize SQLite Database
   useEffect(() => {
     async function setup() {

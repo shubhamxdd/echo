@@ -121,20 +121,37 @@ export function GuideTour({ isOpen, onClose }: GuideTourProps) {
     const updatePosition = () => {
       const rect = el.getBoundingClientRect();
       const cardWidth = 320;
-      
-      // Calculate top position (default below, fallback above if it goes offscreen)
-      let top = rect.bottom + 12;
-      let left = rect.left + (rect.width - cardWidth) / 2;
+      const cardHeight = 160;
 
-      // Clamps
+      let top = 0;
+      let left = 0;
+
+      if (rect.height > window.innerHeight * 0.8) {
+        // Place card to the side of very tall elements (e.g. sidebar)
+        if (rect.left + rect.width / 2 < window.innerWidth / 2) {
+          left = rect.right + 12;
+        } else {
+          left = rect.left - cardWidth - 12;
+        }
+        top = rect.top + (rect.height - cardHeight) / 2;
+      } else {
+        // Place card below/above short elements
+        top = rect.bottom + 12;
+        left = rect.left + (rect.width - cardWidth) / 2;
+
+        if (top + cardHeight > window.innerHeight - 12) {
+          top = rect.top - cardHeight - 12; // place above
+        }
+      }
+
+      // Clamps for screen boundaries
       if (left < 12) left = 12;
       if (left + cardWidth > window.innerWidth - 12) {
         left = window.innerWidth - cardWidth - 12;
       }
-      
-      // Check if card overflows bottom
-      if (top + 160 > window.innerHeight - 12) {
-        top = rect.top - 160 - 12; // place above
+      if (top < 12) top = 12;
+      if (top + cardHeight > window.innerHeight - 12) {
+        top = window.innerHeight - cardHeight - 12;
       }
 
       setCardStyle({
