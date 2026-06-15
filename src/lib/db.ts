@@ -64,6 +64,17 @@ export async function initDb(): Promise<void> {
       );
     `);
 
+    // 4. Create environments table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS environments (
+        id          TEXT PRIMARY KEY,
+        name        TEXT NOT NULL,
+        variables   TEXT NOT NULL,
+        created_at  INTEGER NOT NULL,
+        updated_at  INTEGER NOT NULL
+      );
+    `);
+
     console.log('Database initialized successfully with schema');
   } catch (error) {
     console.error('Failed to initialize database schema:', error);
