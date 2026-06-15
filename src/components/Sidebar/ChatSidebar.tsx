@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HttpResponse, KeyValueItem } from '../../types';
+import { fetch } from '@tauri-apps/plugin-http';
 import {
   Send,
   Sparkles,
@@ -320,6 +321,9 @@ export function ChatSidebar({
 
         if (apiKey) {
           headersObj['Authorization'] = `Bearer ${apiKey}`;
+          headersObj['Authentication'] = `Bearer ${apiKey}`;
+          headersObj['api-key'] = apiKey;
+          headersObj['x-api-key'] = apiKey;
         }
 
         // OpenRouter requirements
