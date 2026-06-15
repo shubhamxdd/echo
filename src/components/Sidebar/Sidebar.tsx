@@ -19,6 +19,7 @@ interface SidebarProps {
   onCreateSubfolder: (parentId: string) => void;
   onCreateRequest: (collectionId: string) => void;
   onRenameFolder: (id: string, currentName: string) => void;
+  onRenameRequest?: (id: string, currentName: string) => void;
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
@@ -43,6 +44,7 @@ export function Sidebar({
   onCreateSubfolder,
   onCreateRequest,
   onRenameFolder,
+  onRenameRequest,
   onDeleteFolder,
   onDeleteRequest,
   onExportFolder,
@@ -216,6 +218,7 @@ export function Sidebar({
             onCreateSubfolder={onCreateSubfolder}
             onCreateRequest={onCreateRequest}
             onRenameFolder={onRenameFolder}
+            onRenameRequest={onRenameRequest}
             onDeleteFolder={onDeleteFolder}
             onDeleteRequest={onDeleteRequest}
             onExportFolder={onExportFolder}

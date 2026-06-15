@@ -29,6 +29,7 @@ interface CollectionTreeProps {
   onCreateSubfolder: (parentId: string) => void;
   onCreateRequest: (collectionId: string) => void;
   onRenameFolder: (id: string, currentName: string) => void;
+  onRenameRequest?: (id: string, currentName: string) => void;
   onDeleteFolder: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onExportFolder: (id: string) => void;
@@ -45,6 +46,7 @@ export function CollectionTree({
   onCreateSubfolder,
   onCreateRequest,
   onRenameFolder,
+  onRenameRequest,
   onDeleteFolder,
   onDeleteRequest,
   onExportFolder,
@@ -213,6 +215,14 @@ export function CollectionTree({
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36 bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300">
+                          <DropdownMenuItem
+                            onClick={() => onRenameRequest?.(req.id, req.name)}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-zinc-400" />
+                            <span>Rename Request</span>
+                          </DropdownMenuItem>
+
                           <DropdownMenuItem
                             onClick={() => onMoveRequest?.(req.id, req.collection_id)}
                             className="flex items-center gap-2 cursor-pointer"

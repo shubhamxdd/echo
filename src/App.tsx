@@ -15,6 +15,8 @@ import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } fro
 import { Sun, Moon, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { ChatSidebar } from './components/Sidebar/ChatSidebar';
 import { useAlertDialog } from './components/common/AlertDialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 function App() {
   const { showAlert, showConfirm } = useAlertDialog();
@@ -48,6 +50,7 @@ function App() {
     deleteCollection,
     saveRequest,
     deleteRequest,
+    renameRequest,
     moveRequest,
     duplicateRequest,
     duplicateCollection,
@@ -126,6 +129,10 @@ function App() {
   const [saveReqModalOpen, setSaveReqModalOpen] = useState(false);
   const [saveReqName, setSaveReqName] = useState('');
   const [saveReqCollectionId, setSaveReqCollectionId] = useState('');
+
+  const [renameReqModalOpen, setRenameReqModalOpen] = useState(false);
+  const [renameReqId, setRenameReqId] = useState('');
+  const [renameReqName, setRenameReqName] = useState('');
 
   const [shortcutModalOpen, setShortcutModalOpen] = useState(false);
 
@@ -1004,6 +1011,31 @@ function App() {
     setColModalOpen(false);
   };
 
+  const openRenameReqModal = (id: string, name: string) => {
+    setRenameReqId(id);
+    setRenameReqName(name);
+    setRenameReqModalOpen(true);
+  };
+
+  const handleRenameReqSubmit = async () => {
+    if (!renameReqName.trim()) return;
+    await renameRequest(renameReqId, renameReqName.trim());
+    setRenameReqModalOpen(false);
+
+    setTabs((prev) =>
+      prev.map((t) => {
+        if (t.savedRequestId === renameReqId) {
+          return { ...t, name: renameReqName.trim() };
+        }
+        return t;
+      })
+    );
+
+    if (activeRequestMeta.id === renameReqId) {
+      setActiveRequestMeta((prev) => ({ ...prev, name: renameReqName.trim() }));
+    }
+  };
+
   // Import / Export handlers
   const handleExportFolder = async (colId: string) => {
     try {
@@ -1094,6 +1126,7 @@ function App() {
             onCreateSubfolder={(parentId) => openCreateColModal(parentId)}
             onCreateRequest={handleSidebarCreateRequest}
             onRenameFolder={openRenameColModal}
+            onRenameRequest={openRenameReqModal}
             onDeleteFolder={async (id) => {
               const confirmed = await showConfirm("Are you sure you want to delete this collection? This will permanently delete all sub-collections and requests inside it.", "Delete Collection", "Delete");
               if (confirmed) {
@@ -1441,6 +1474,47 @@ function App() {
             >
               Save Request
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Rename Request Modal */}
+      <Modal
+        isOpen={renameReqModalOpen}
+        onClose={() => setRenameReqModalOpen(false)}
+        title="Rename Saved Request"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="block text-[11px] font-semibold text-zinc-400">Request Name</label>
+            <Input
+              type="text"
+              placeholder="e.g. Get User details"
+              value={renameReqName}
+              onChange={(e) => setRenameReqName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRenameReqSubmit();
+              }}
+              className="w-full bg-zinc-950 border-zinc-800 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/25 h-8 text-xs text-zinc-200 font-sans"
+              autoFocus
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 border-t border-zinc-800 pt-3 mt-4">
+            <Button
+              onClick={() => setRenameReqModalOpen(false)}
+              variant="outline"
+              className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:bg-zinc-850 hover:text-zinc-250 cursor-pointer h-8 border-transparent"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRenameReqSubmit}
+              disabled={!renameReqName.trim()}
+              className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-8 border-transparent"
+            >
+              Rename
+            </Button>
           </div>
         </div>
       </Modal>

@@ -430,6 +430,21 @@ export function useCollections() {
     }
   };
 
+  const renameRequest = async (id: string, name: string) => {
+    try {
+      const db = await getDb();
+      const now = Date.now();
+      await db.execute(
+        `UPDATE requests SET name = ?, updated_at = ? WHERE id = ?`,
+        [name, now, id]
+      );
+      await loadCollections();
+    } catch (error) {
+      console.error('Failed to rename request:', error);
+      throw error;
+    }
+  };
+
   return {
     collections,
     loading,
@@ -439,6 +454,7 @@ export function useCollections() {
     deleteCollection,
     saveRequest,
     deleteRequest,
+    renameRequest,
     moveRequest,
     duplicateRequest,
     duplicateCollection,
