@@ -13,7 +13,8 @@ export function useRequest() {
     bodyType: 'none' | 'raw' | 'json' | 'form',
     body: string,
     authType: 'none' | 'bearer' | 'basic' | 'apikey',
-    authData: any
+    authData: any,
+    signal?: AbortSignal
   ): Promise<HttpResponse> => {
     setLoading(true);
     const startTime = performance.now();
@@ -116,6 +117,7 @@ export function useRequest() {
         headers: reqHeaders,
         body: requestBody,
         connectTimeout: 30000, // 30s timeout
+        signal,
       });
 
       const endTime = performance.now();
