@@ -23,7 +23,7 @@ export function ResponseHeaders({ headers }: ResponseHeadersProps) {
   );
 
   return (
-    <div className="flex flex-col h-full gap-2 text-xs">
+    <div className="flex flex-col h-full gap-1.5 text-xs">
       {/* Headers Filter Search */}
       {headers.length > 0 && (
         <div className="relative flex items-center max-w-xs">
@@ -49,7 +49,7 @@ export function ResponseHeaders({ headers }: ResponseHeadersProps) {
             {filteredHeaders.map((header) => (
               <div
                 key={header.key}
-                className="group flex items-start gap-4 p-2 hover:bg-zinc-800/10 font-mono text-[11px]"
+                className="group flex items-start gap-4 p-1.5 hover:bg-zinc-800/10 font-mono text-[11px]"
               >
                 <div className="w-1/3 text-orange-400 font-semibold select-all truncate break-all">
                   {header.key}

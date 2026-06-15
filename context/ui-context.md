@@ -2,11 +2,12 @@
 
 ## Theme
 
-RestDesk uses a **sleek, premium dark technical theme** optimized for developers. It features near-black backgrounds, card/panel surfaces, fine borders, and vibrant accent colors to distinguish HTTP methods and active states. 
+RestDesk uses a **sleek, premium dark technical theme** (with toggleable light mode option) optimized for developers. It features near-black backgrounds, card/panel surfaces, fine borders, and vibrant accent colors to distinguish HTTP methods and active states. 
 
-- **Dark-Only**: No light mode support to maintain high contrast and code-editing ergonomics.
+- **Dark & Light Modes**: Supports both themes (saving preference in localStorage), defaulting to dark mode.
 - **Glassmorphism**: Subtle backdrops and translucent panel headers.
-- **Micro-Animations**: Smooth scale transitions on button hover, fade-ins for loaded data, and rotating loading states.
+- **Micro-Animations & Indicators**: Pulsing orange indicator for saved responses, rotating spinner for pending network calls, and smooth scale transitions on hover.
+- **Shadcn UI Base**: Integrates Tailwind-styled base components (Buttons, Input fields, Tabs, Dialogs, Dropdown Menus) for unified design elements.
 
 ## Colors (Tailwind v4 Integration)
 
@@ -40,9 +41,10 @@ Tailwind CSS v4 handles theme customization via standard CSS variables in `@them
 
 ## Border Radius
 
-- **Inline / Small UI** (Buttons, inputs, method badges): `rounded-md` (6px)
+- **Inline / Small UI** (Buttons, inputs, method badges): `rounded-md` (6px) matching Shadcn design defaults
 - **Cards / Panels / Tabs**: `rounded-lg` (8px)
 - **Modals / Overlays**: `rounded-xl` (12px)
+- **Focus Rings**: Standardized ring behavior (`focus-visible:ring-1 focus-visible:ring-ring`) from Shadcn instead of manual borders.
 
 ## Layout Patterns
 

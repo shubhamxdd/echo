@@ -17,9 +17,9 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
   const headersCount = response?.headers ? response.headers.length : 0;
 
   return (
-    <div className="flex flex-col h-full bg-zinc-900/10 p-4 gap-3 overflow-hidden select-none border-t border-zinc-800/80">
+    <div className="flex flex-col h-full bg-zinc-900/10 pt-2.5 px-4 pb-4 gap-2 overflow-hidden select-none border-t border-zinc-800/80">
       {/* Response Panel Title & Status Line */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5">
         <div className="flex items-center gap-1.5">
           <Terminal className="w-4 h-4 text-orange-400" />
           <h2 className="text-xs font-semibold text-zinc-150 uppercase tracking-wider">Response</h2>
@@ -70,7 +70,7 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
           </div>
         ) : (
           // Successful / Finished Response State
-          <div className="flex flex-col h-full gap-3">
+          <div className="flex flex-col h-full gap-2">
             {/* Inner Tabs Selector */}
             <Tabs
               value={activeTab}

@@ -31,27 +31,38 @@ RestDesk is a lightweight, high-performance, and secure personal REST API client
 ### Sidebar Management
 - **Nested Collections**: Hierarchical folder structure allowing users to organize saved requests recursively.
 - **Request History**: Automatic logging of all sent requests with quick-reload, capped at the last 500 entries (auto-pruned).
+- **Request Renaming**: Inline options to rename saved requests from the collections sidebar.
 
 ### Response Inspection
 - Status bar displaying HTTP code, response time, and content size.
-- Pretty-printed JSON viewer with collapsible nodes.
-- Full response headers viewer.
+- Pretty-printed JSON viewer with collapsible nodes, filtering, and copy options.
+- Full response headers viewer with individual header copy helpers.
+- **Saved Response Cache**: Automatically persists and loads the last response context (status, duration, size, headers, body) for saved requests, indicated by a pulsing orange "Saved Output" badge.
+
+### Environment variables
+- Manage multiple environments with key-value variables that resolve dynamically using `{{variable_name}}` syntax in URL, parameters, headers, and body.
+
+### Collection Portability
+- Recursive export of collection folders, nested folders, requests, parameters, and headers into the standard Postman Collection v2.1.0 JSON format.
 
 ## Scope
 
 ### In Scope
 - Tauri v2 single-window Windows desktop application.
-- Vite + React + TypeScript + Tailwind CSS v4 frontend.
+- Vite + React + TypeScript + Tailwind CSS v4 frontend using the **Shadcn UI** components library.
 - Local SQLite database managed via `tauri-plugin-sql`.
 - Direct CORS-free HTTP requests using `@tauri-apps/plugin-http`.
 - Hierarchical collections (nested folders).
 - Auto-logged history up to 500 records.
+- Environment variables management and dynamic placeholder resolution.
+- Request renaming, duplication, and database-level cascading deletion.
+- Saved HTTP response cache stored in the SQLite `requests` table.
+- Exporter module converting hierarchical collection trees to Postman Collection v2.1.0 format.
 
 ### Out of Scope
 - Multi-window workspace support.
 - Cloud synchronization, team collaboration, or shared workspaces.
 - Pre-request scripting or test assertion engines.
-- Environment variables management (out of scope for Phase 1-4).
 
 ## Success Criteria
 

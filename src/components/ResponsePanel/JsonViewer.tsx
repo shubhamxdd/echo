@@ -131,9 +131,9 @@ export function JsonViewer({ body }: JsonViewerProps) {
   };
 
   return (
-    <div className="flex flex-col h-full gap-2 overflow-hidden text-xs">
+    <div className="flex flex-col h-full gap-1.5 overflow-hidden text-xs">
       {/* Top Menu: Selector & Copy */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5">
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
             {isJson && (
@@ -206,7 +206,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
       </div>
 
       {/* Viewer Panel */}
-      <div className="flex-1 overflow-auto border border-zinc-800 rounded-lg bg-zinc-950/40 p-3 min-h-[120px] font-mono text-xs select-text">
+      <div className="flex-1 overflow-auto border border-zinc-800 rounded-lg bg-zinc-950/40 p-2 min-h-[120px] font-mono text-xs select-text">
         {!body || body.trim() === '' ? (
           <div className="text-zinc-600 italic text-center py-12">
             No Response Body

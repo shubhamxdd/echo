@@ -7,7 +7,7 @@
 | Framework | Tauri v2 + Vite + React     | Native desktop wrapper + Frontend runner |
 | UI        | Tailwind CSS v4             | Utility-first responsive styling framework |
 | Language  | TypeScript                  | Type safety across the React application |
-| Database  | SQLite (`tauri-plugin-sql`) | Local data persistence for collections and history |
+| Database  | SQLite (`tauri-plugin-sql`) | Local data persistence for collections, history, and environments |
 | HTTP      | `@tauri-apps/plugin-http`  | Rust-backed native fetch client (bypasses CORS) |
 
 ## System Boundaries
@@ -17,11 +17,13 @@
   - `Sidebar/` (Collections tree and History list).
   - `RequestPanel/` (URL bar, parameters, headers, body, and auth editors).
   - `ResponsePanel/` (Status bar, collapsible JSON viewer, response headers).
-  - `common/` (Reusable input fields, key-value grids, modals).
+  - `common/` (Reusable key-value grids, modals, alerts).
+  - `ui/` (Shadcn UI base components: tabs, button, input, dropdown-menu, dialog).
 - `src/hooks/` — Custom hooks encapsulating business logic:
   - `useRequest.ts` (handles sending request via native HTTP and measuring execution duration).
   - `useCollections.ts` (handles CRUD for nested collections and saved requests).
   - `useHistory.ts` (handles logging requests and pruning to 500 entries).
+  - `useEnvironments.ts` (handles CRUD for variables/environments).
 - `src/lib/` — Shared libraries including `db.ts` (SQLite connection initialization, table migration, and raw query wrappers).
 - `src-tauri/` — Rust Tauri configuration, backend plugins declaration (SQL, HTTP), permissions settings, and app bundling configurations.
 
@@ -29,8 +31,9 @@
 
 - **Local SQLite Database (`restdesk.db`)**: Managed via `tauri-plugin-sql` and stored automatically in the operating system's application data directory (`%APPDATA%/RestDesk/restdesk.db` on Windows).
   - **`collections`**: Stores folder metadata, including `parent_id` to allow recursive nesting.
-  - **`requests`**: Stores saved request configurations (URL, method, headers, params, body, auth) associated with a collection.
+  - **`requests`**: Stores saved request configurations (URL, method, headers, params, body, auth) and the cached response context (`response_status`, `response_status_text`, `response_duration_ms`, `response_headers`, `response_body`, `response_error`).
   - **`history`**: Stores sent request logs (method, URL, status, duration, request/response headers, request/response body, error).
+  - **`environments`**: Stores environment metadata and serialized variables JSON.
 
 ## Auth and Access Model
 

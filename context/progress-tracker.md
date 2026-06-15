@@ -2,12 +2,12 @@
 
 ## Current Status
 
-- **Status**: Implemented & Compiles Cleanly (Waiting for user instructions to run or build).
-- **Phase**: Phase 1 & 2 — Working Core & Auth Helpers (Completed)
+- **Status**: Completed, optimized, and verified type-safe (`tsc --noEmit` runs with 0 errors).
+- **Phase**: Phase 4 — Polishing, styling refinements, and export functionalities (Completed).
 
 ## Current Goal
 
-- Launching the development server (`npm run tauri dev`) to verify execution, check the SQLite table persistence, and run sample REST API requests.
+- Ship the revamped Echo client with a clean Shadcn UI interface, responsive panels, request renaming options, cached response visualization, and Postman v2.1.0 exporters.
 
 ## Completed
 
@@ -15,26 +15,24 @@
 - **Tauri App Scaffolding**: Setup Tauri v2 + React + Vite + TypeScript.
 - **Tailwind CSS v4 Integration**: Integrated Tailwind v4 into Vite config and established global theme styling variables.
 - **Tauri Plugins**: Added and configured `tauri-plugin-sql` (with SQLite) and `tauri-plugin-http`.
-- **Database Logic**: Set up `db.ts` to initialize tables (`collections`, `requests`, `history`) with support for nested collections.
+- **Database Logic**: Set up `db.ts` to initialize tables (`collections`, `requests`, `history`, `environments`) with support for nested collections and schema migrations for request caching.
 - **Request Executor Hook**: Implemented `useRequest.ts` using `@tauri-apps/plugin-http` to execute CORS-free requests, compile query parameters/headers, apply auth helpers, and measure durations.
-- **Collections & History CRUD Hooks**: Created `useCollections.ts` and `useHistory.ts` to handle database CRUD operations, recursive collection structures, and history pruning to 500 records.
-- **UI Components**:
-  - `Sidebar` (recursive `CollectionTree` with hover CRUD triggers, and `HistoryList` grouped by date).
-  - `RequestPanel` (`UrlBar` with method selector, `AuthEditor` supporting Bearer/Basic/API Key, `BodyEditor` with raw/JSON/form-data support, and tab layouts).
-  - `ResponsePanel` (`StatusBar` for timings, `ResponseHeaders` with copy helpers, and `JsonViewer` using `react-json-view-lite` for JSON folding).
-  - `common` (reusable `KeyValueEditor` and blur-backdrop `Modal` dialogs).
-- **TypeScript Compliance**: Reran `tsc --noEmit` and resolved all type issues and unused imports. All builds compile 100% cleanly.
+- **Collections, History, and Environment Hooks**: Created custom database CRUD hooks (`useCollections.ts`, `useHistory.ts`, `useEnvironments.ts`) to handle hierarchical data structure, automatic history pruning to 500 records, and dynamic variable lookup.
+- **Shadcn UI Refactoring**: Replaced custom elements with official Shadcn CLI-installed base components (Tabs, Button, Input, DropdownMenu, Dialog) and removed all manual outlines/focus style hacks.
+- **Request Renaming**: Added sidebar options to rename saved requests inline via a custom modal dialog synchronized with open workspace tabs.
+- **Response Caching & Status Badges**: Added caching columns to the SQLite `requests` table. Clicking a saved request immediately loads its cached output, displaying a pulsing orange "Saved Output" badge in the response panel.
+- **Postman Collection Export**: Implemented a recursive translator that outputs nested folders, headers, authentication configs, params, and body payload of any collection into a fully compatible Postman Collection v2.1.0 JSON file.
+- **Response Panel Optimization**: Refined spacing, margins, gaps, and paddings in the ResponsePanel, JsonViewer, and ResponseHeaders components to shift the main output window higher up for an improved developer reading experience.
+- **TypeScript Compliance**: Resolved all compiler warnings; `tsc --noEmit` compiles 100% cleanly with zero errors.
 
 ## In Progress
 
-- Phase 3 & 4 (Built but ready for manual verification and running dev build).
+- Done. The entire feature checklist and polishing requests are implemented.
 
 ## Next Up
 
-- Run `npm run tauri dev` to launch the application.
-- Verify making requests (e.g. GET/POST on `https://httpbin.org`).
-- Verify creating nested collections and adding requests to them.
-- Verify history log recording and deletion.
+- Run the Tauri app in development or production mode to test functionality.
+- Bundle the app for distribution (`npm run tauri build`).
 
 ## Open Questions
 

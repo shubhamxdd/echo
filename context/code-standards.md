@@ -15,6 +15,8 @@
 ## React & Styling
 
 - **Tailwind CSS v4 Utility Classes**: Style elements using Tailwind utility classes. Use CSS custom properties in global styles or Tailwind config for theme values.
+- **Shadcn UI Base Components**: Build custom UI using Shadcn's primitives (e.g. Button, Input, Tabs, Dialog, DropdownMenu). Avoid styling custom buttons/inputs manually.
+- **Focus Rings**: Rely on Shadcn's focus ring utility classes (`focus-visible:ring-1 focus-visible:ring-ring`) instead of custom focus-visible borders.
 - **Component Splitting**: Keep files under 200 lines where possible. Break down components (e.g., `UrlBar`, `AuthEditor`) into their own files.
 - **State Locality**: Keep state as close to where it's used as possible. Lift state to `App.tsx` only if multiple panels need access (e.g., current request configuration, active response).
 
@@ -33,6 +35,7 @@
 ## File Organization
 
 - `src/components/` — Small, presentation-focused components.
+- `src/components/ui/` — Base primitive UI elements managed via Shadcn CLI.
 - `src/hooks/` — Custom React hooks containing logic (e.g., SQL queries, HTTP execution).
-- `src/lib/db.ts` — Connection instantiation and core SQL initialization.
+- `src/lib/db.ts` — Connection instantiation, migrations, and core SQL initialization.
 - `src/types/index.ts` — Shared TypeScript type interfaces.
