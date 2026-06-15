@@ -4,6 +4,8 @@ import { KeyValueEditor } from './KeyValueEditor';
 import { Environment, KeyValueItem } from '../../types';
 import { Plus, Trash2, ShieldAlert } from 'lucide-react';
 import { useAlertDialog } from './AlertDialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface EnvironmentModalProps {
   isOpen: boolean;
@@ -119,12 +121,13 @@ export function EnvironmentModal({
             )}
           </div>
           
-          <button
+          <Button
             onClick={handleCreate}
-            className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 border border-dashed border-zinc-800 hover:border-orange-500/40 text-xs text-zinc-400 hover:text-orange-400 rounded-md transition-colors cursor-pointer font-medium"
+            variant="outline"
+            className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 border border-dashed border-zinc-800 hover:border-orange-500/40 text-xs text-zinc-400 hover:text-orange-400 rounded-md transition-colors cursor-pointer font-medium h-8"
           >
             <Plus className="w-3.5 h-3.5" /> New Environment
-          </button>
+          </Button>
         </div>
 
         {/* Right pane - Environment details editor */}
@@ -134,11 +137,11 @@ export function EnvironmentModal({
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                 <div className="space-y-1">
                   <label className="block text-[11px] font-semibold text-zinc-400">Environment Name</label>
-                  <input
+                  <Input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-1.5 px-3 text-xs text-zinc-200 font-medium font-sans"
+                    className="w-full bg-zinc-950 border border-zinc-800 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/25 h-8 text-xs text-zinc-200 font-medium font-sans"
                     placeholder="e.g. Production"
                   />
                 </div>
@@ -155,13 +158,13 @@ export function EnvironmentModal({
               </div>
               
               <div className="flex justify-end gap-2 border-t border-zinc-800 pt-3 mt-4 shrink-0">
-                <button
+                <Button
                   onClick={handleSave}
                   disabled={!editName.trim()}
-                  className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-8 border-transparent"
                 >
                   Save Changes
-                </button>
+                </Button>
               </div>
             </div>
           ) : (

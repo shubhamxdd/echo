@@ -14,6 +14,13 @@ import {
   Copy,
   MoreHorizontal,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 interface CollectionTreeProps {
   collections: Collection[];
@@ -46,14 +53,9 @@ export function CollectionTree({
   onDuplicateRequest,
 }: CollectionTreeProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const toggleDropdown = (id: string) => {
-    setActiveDropdownId((prev) => (prev === id ? null : id));
   };
 
   const getMethodBadgeClass = (method: string) => {
@@ -101,96 +103,70 @@ export function CollectionTree({
 
           {/* Options Dropdown Trigger Button */}
           <div
-            className={`transition-all ml-2 relative shrink-0 ${
-              activeDropdownId === col.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}
+            className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all ml-2 relative shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => toggleDropdown(col.id)}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer flex items-center justify-center border border-transparent hover:border-zinc-700/50"
-              title="Options"
-            >
-              <MoreHorizontal className="w-3.5 h-3.5" />
-            </button>
-
-            {activeDropdownId === col.id && (
-              <>
-                {/* Click backdrop to close */}
-                <div className="fixed inset-0 z-40" onClick={() => setActiveDropdownId(null)} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer flex items-center justify-center border border-transparent hover:border-zinc-700/50"
+                  title="Options"
+                >
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300">
+                <DropdownMenuItem
+                  onClick={() => onCreateRequest(col.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <FilePlus className="w-3.5 h-3.5 text-orange-500" />
+                  <span>Add Request</span>
+                </DropdownMenuItem>
                 
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-1 w-44 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-100 text-[11px]">
-                  <button
-                    onClick={() => {
-                      onCreateRequest(col.id);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                  >
-                    <FilePlus className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Add Request</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      onCreateSubfolder(col.id);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                  >
-                    <FolderPlus className="w-3.5 h-3.5 text-orange-500" />
-                    <span>New Sub-collection</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      onExportFolder(col.id);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Export Collection</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      onRenameFolder(col.id, col.name);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                  >
-                    <Edit2 className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Rename Folder</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      onDuplicateFolder?.(col.id);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                  >
-                    <Copy className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Duplicate Collection</span>
-                  </button>
-                  
-                  <div className="border-t border-zinc-850 my-1" />
-                  
-                  <button
-                    onClick={() => {
-                      onDeleteFolder(col.id);
-                      setActiveDropdownId(null);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-rose-450 hover:text-rose-350 hover:bg-zinc-850 text-left transition-colors font-medium"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Folder</span>
-                  </button>
-                </div>
-              </>
-            )}
+                <DropdownMenuItem
+                  onClick={() => onCreateSubfolder(col.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <FolderPlus className="w-3.5 h-3.5 text-orange-500" />
+                  <span>New Sub-collection</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem
+                  onClick={() => onExportFolder(col.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-orange-500" />
+                  <span>Export Collection</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem
+                  onClick={() => onRenameFolder(col.id, col.name)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Edit2 className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>Rename Folder</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem
+                  onClick={() => onDuplicateFolder?.(col.id)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5 text-orange-500" />
+                  <span>Duplicate Collection</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator className="border-t border-zinc-850" />
+                
+                <DropdownMenuItem
+                  onClick={() => onDeleteFolder(col.id)}
+                  className="flex items-center gap-2 cursor-pointer text-rose-450 focus:text-rose-450 hover:text-rose-350 hover:bg-zinc-850 font-medium"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Folder</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -224,60 +200,46 @@ export function CollectionTree({
 
                     {/* Request Actions Options Dropdown Button */}
                     <div
-                      className={`transition-all ml-2 relative shrink-0 ${
-                        activeDropdownId === req.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                      }`}
+                      className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all ml-2 relative shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        onClick={() => toggleDropdown(req.id)}
-                        className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer flex items-center justify-center border border-transparent hover:border-zinc-700/50"
-                        title="Options"
-                      >
-                        <MoreHorizontal className="w-3.5 h-3.5" />
-                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-350 transition-colors cursor-pointer flex items-center justify-center border border-transparent hover:border-zinc-700/50"
+                            title="Options"
+                          >
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36 bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300">
+                          <DropdownMenuItem
+                            onClick={() => onMoveRequest?.(req.id, req.collection_id)}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <FolderInput className="w-3.5 h-3.5 text-orange-500" />
+                            <span>Move Request</span>
+                          </DropdownMenuItem>
+                          
+                          <DropdownMenuItem
+                            onClick={() => onDuplicateRequest?.(req.id)}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <Copy className="w-3.5 h-3.5 text-orange-500" />
+                            <span>Duplicate Request</span>
+                          </DropdownMenuItem>
 
-                      {activeDropdownId === req.id && (
-                        <>
-                          <div className="fixed inset-0 z-40" onClick={() => setActiveDropdownId(null)} />
-                          <div className="absolute right-0 mt-1 w-36 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-100 text-[11px]">
-                            <button
-                              onClick={() => {
-                                onMoveRequest?.(req.id, req.collection_id);
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                            >
-                              <FolderInput className="w-3.5 h-3.5 text-orange-500" />
-                              <span>Move Request</span>
-                            </button>
-                            
-                            <button
-                              onClick={() => {
-                                onDuplicateRequest?.(req.id);
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 text-left transition-colors"
-                            >
-                              <Copy className="w-3.5 h-3.5 text-orange-500" />
-                              <span>Duplicate Request</span>
-                            </button>
+                          <DropdownMenuSeparator className="border-t border-zinc-850" />
 
-                            <div className="border-t border-zinc-850 my-1" />
-
-                            <button
-                              onClick={() => {
-                                onDeleteRequest(req.id);
-                                setActiveDropdownId(null);
-                              }}
-                              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-rose-455 hover:text-rose-350 hover:bg-zinc-850 text-left transition-colors font-medium"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>Delete Request</span>
-                            </button>
-                          </div>
-                        </>
-                      )}
+                          <DropdownMenuItem
+                            onClick={() => onDeleteRequest(req.id)}
+                            className="flex items-center gap-2 cursor-pointer text-rose-455 focus:text-rose-455 hover:text-rose-350 hover:bg-zinc-850 font-medium"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Request</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 );

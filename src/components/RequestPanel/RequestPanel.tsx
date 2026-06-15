@@ -4,6 +4,7 @@ import { UrlBar } from './UrlBar';
 import { AuthEditor } from './AuthEditor';
 import { BodyEditor } from './BodyEditor';
 import { KeyValueEditor } from '../common/KeyValueEditor';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RequestPanelProps {
   method: string;
@@ -84,67 +85,58 @@ export function RequestPanel({
       />
 
       {/* Tabs Menu */}
-      <div id="tour-reqtabs" className="flex gap-4 border-b border-zinc-800 pb-1 text-xs font-medium">
-        <button
-          onClick={() => setActiveTab('params')}
-          className={`pb-2 transition-all relative cursor-pointer select-none ${
-            activeTab === 'params'
-              ? 'text-orange-400 border-b-2 border-orange-500'
-              : 'text-zinc-500 hover:text-zinc-350'
-          }`}
-        >
-          <span>Query Params</span>
-          {paramsCount > 0 && (
-            <span className="ml-1 px-1 py-0.2 bg-zinc-800 text-[10px] text-zinc-400 rounded-full">
-              {paramsCount}
-            </span>
-          )}
-        </button>
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as 'params' | 'headers' | 'body' | 'auth')}
+        id="tour-reqtabs"
+        className="w-full border-b border-zinc-800"
+      >
+        <TabsList variant="line" className="h-8 justify-start gap-4">
+          <TabsTrigger
+            value="params"
+            className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+          >
+            <span>Query Params</span>
+            {paramsCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 text-[10px] text-zinc-400 rounded-full font-mono">
+                {paramsCount}
+              </span>
+            )}
+          </TabsTrigger>
 
-        <button
-          onClick={() => setActiveTab('headers')}
-          className={`pb-2 transition-all relative cursor-pointer select-none ${
-            activeTab === 'headers'
-              ? 'text-orange-400 border-b-2 border-orange-500'
-              : 'text-zinc-500 hover:text-zinc-355'
-          }`}
-        >
-          <span>Headers</span>
-          {headersCount > 0 && (
-            <span className="ml-1 px-1 py-0.2 bg-zinc-800 text-[10px] text-zinc-400 rounded-full">
-              {headersCount}
-            </span>
-          )}
-        </button>
+          <TabsTrigger
+            value="headers"
+            className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+          >
+            <span>Headers</span>
+            {headersCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 text-[10px] text-zinc-400 rounded-full font-mono">
+                {headersCount}
+              </span>
+            )}
+          </TabsTrigger>
 
-        <button
-          onClick={() => setActiveTab('body')}
-          className={`pb-2 transition-all relative cursor-pointer select-none ${
-            activeTab === 'body'
-              ? 'text-orange-400 border-b-2 border-orange-500'
-              : 'text-zinc-500 hover:text-zinc-355'
-          }`}
-        >
-          <span>Body</span>
-          {isBodyActive && (
-            <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
-          )}
-        </button>
+          <TabsTrigger
+            value="body"
+            className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+          >
+            <span>Body</span>
+            {isBodyActive && (
+              <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
+            )}
+          </TabsTrigger>
 
-        <button
-          onClick={() => setActiveTab('auth')}
-          className={`pb-2 transition-all relative cursor-pointer select-none ${
-            activeTab === 'auth'
-              ? 'text-orange-400 border-b-2 border-orange-500'
-              : 'text-zinc-500 hover:text-zinc-355'
-          }`}
-        >
-          <span>Authorization</span>
-          {isAuthActive && (
-            <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
-          )}
-        </button>
-      </div>
+          <TabsTrigger
+            value="auth"
+            className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+          >
+            <span>Authorization</span>
+            {isAuthActive && (
+              <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
+            )}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Tab Panels */}
       <div className="flex-1 overflow-y-auto min-h-0">

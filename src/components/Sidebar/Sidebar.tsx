@@ -4,6 +4,8 @@ import { CollectionTree } from './CollectionTree';
 import { HistoryList } from './HistoryList';
 import { FolderPlus, Search, History, FolderOpen, Upload, HelpCircle, Compass } from 'lucide-react';
 import { useAlertDialog } from '../common/AlertDialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 interface SidebarProps {
   collections: Collection[];
@@ -165,42 +167,40 @@ export function Sidebar({
       </div>
 
       {/* Tabs Selector */}
-      <div className="flex px-3 pt-2 pb-1 bg-zinc-900/50">
-        <button
-          onClick={() => setActiveTab('collections')}
-          className={`flex-1 py-1.5 text-center text-xs flex items-center justify-center gap-1.5 rounded-md transition-all font-medium ${
-            activeTab === 'collections'
-              ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/50 shadow'
-              : 'text-zinc-500 hover:text-zinc-300'
-          }`}
-        >
-          <FolderOpen className="w-3.5 h-3.5" />
-          Collections
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`flex-1 py-1.5 text-center text-xs flex items-center justify-center gap-1.5 rounded-md transition-all font-medium ${
-            activeTab === 'history'
-              ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/50 shadow'
-              : 'text-zinc-500 hover:text-zinc-300'
-          }`}
-        >
-          <History className="w-3.5 h-3.5" />
-          History
-        </button>
-      </div>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as 'collections' | 'history')}
+        className="px-3 pt-2 pb-1"
+      >
+        <TabsList className="grid w-full grid-cols-2 bg-zinc-950 border border-zinc-800/85 p-[2px] h-8 rounded-lg">
+          <TabsTrigger
+            value="collections"
+            className="flex items-center justify-center gap-1.5 text-xs font-medium data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100 hover:text-zinc-300 py-1 cursor-pointer"
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            Collections
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="flex items-center justify-center gap-1.5 text-xs font-medium data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100 hover:text-zinc-300 py-1 cursor-pointer"
+          >
+            <History className="w-3.5 h-3.5" />
+            History
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Search Input (only for collections tab) */}
       {activeTab === 'collections' && (
         <div className="px-3 py-2">
           <div className="relative flex items-center">
-            <Search className="absolute left-2.5 w-3.5 h-3.5 text-zinc-650" />
-            <input
+            <Search className="absolute left-2.5 w-3.5 h-3.5 text-zinc-650 z-10 pointer-events-none" />
+            <Input
               type="text"
               placeholder="Filter collections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
+              className="w-full bg-zinc-950 border-zinc-800 focus-visible:border-orange-500/70 focus-visible:ring-orange-500/25 pl-8 text-xs text-zinc-200 placeholder-zinc-700 h-8"
             />
           </div>
         </div>

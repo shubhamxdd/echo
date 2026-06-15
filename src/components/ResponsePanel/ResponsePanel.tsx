@@ -4,6 +4,7 @@ import { StatusBar } from './StatusBar';
 import { JsonViewer } from './JsonViewer';
 import { ResponseHeaders } from './ResponseHeaders';
 import { AlertCircle, Terminal, HelpCircle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ResponsePanelProps {
   response: HttpResponse | null;
@@ -65,34 +66,31 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
           // Successful / Finished Response State
           <div className="flex flex-col h-full gap-3">
             {/* Inner Tabs Selector */}
-            <div className="flex gap-4 border-b border-zinc-800 pb-1 text-xs font-medium">
-              <button
-                onClick={() => setActiveTab('body')}
-                className={`pb-1.5 transition-all relative cursor-pointer select-none ${
-                  activeTab === 'body'
-                    ? 'text-orange-400 border-b-2 border-orange-500'
-                    : 'text-zinc-500 hover:text-zinc-350'
-                }`}
-              >
-                Body
-              </button>
-
-              <button
-                onClick={() => setActiveTab('headers')}
-                className={`pb-1.5 transition-all relative cursor-pointer select-none ${
-                  activeTab === 'headers'
-                    ? 'text-orange-400 border-b-2 border-orange-500'
-                    : 'text-zinc-500 hover:text-zinc-350'
-                }`}
-              >
-                Headers
-                {headersCount > 0 && (
-                  <span className="ml-1 px-1 py-0.2 bg-zinc-800 text-[10px] text-zinc-500 rounded-full font-mono">
-                    {headersCount}
-                  </span>
-                )}
-              </button>
-            </div>
+            <Tabs
+              value={activeTab}
+              onValueChange={(val) => setActiveTab(val as 'body' | 'headers')}
+              className="w-full border-b border-zinc-800"
+            >
+              <TabsList variant="line" className="h-8 justify-start gap-4">
+                <TabsTrigger
+                  value="body"
+                  className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+                >
+                  Body
+                </TabsTrigger>
+                <TabsTrigger
+                  value="headers"
+                  className="pb-2 cursor-pointer font-medium text-xs rounded-none data-[state=active]:text-orange-400 after:bg-orange-500"
+                >
+                  Headers
+                  {headersCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-zinc-800 text-[10px] text-zinc-500 rounded-full font-mono">
+                      {headersCount}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             {/* Inner Content panels */}
             <div className="flex-1 overflow-y-auto min-h-0">

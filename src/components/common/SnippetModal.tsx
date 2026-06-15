@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { KeyValueItem } from '../../types';
 import { Copy, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SnippetModalProps {
   isOpen: boolean;
@@ -223,13 +224,14 @@ export function SnippetModal({
             </select>
           </div>
           
-          <button
+          <Button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 rounded text-xs text-orange-400 hover:text-orange-300 font-semibold cursor-pointer transition-all active:scale-95"
+            variant="outline"
+            className="flex items-center gap-1.5 px-3 py-1 bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 rounded text-xs text-orange-400 hover:text-orange-300 font-semibold cursor-pointer transition-all h-8"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? 'Copied!' : 'Copy Code'}
-          </button>
+          </Button>
         </div>
 
         <div className="relative">
