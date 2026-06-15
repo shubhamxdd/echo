@@ -83,7 +83,7 @@ export function BodyEditor({
               }}
               className={`px-2.5 py-1.5 rounded-md border text-xs transition-colors select-none ${
                 bodyType === opt.type
-                  ? 'bg-violet-500/10 border-violet-500 text-violet-350 font-medium'
+                  ? 'bg-orange-500/10 border-orange-500 text-orange-350 font-medium'
                   : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
               }`}
             >
@@ -101,7 +101,7 @@ export function BodyEditor({
             )}
             <button
               onClick={handleFormatJson}
-              className="text-[10px] text-violet-400 hover:text-violet-350 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 px-2 py-1 rounded transition-colors font-medium cursor-pointer"
+              className="text-[10px] text-orange-400 hover:text-orange-350 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 px-2 py-1 rounded transition-colors font-medium cursor-pointer"
             >
               Format JSON
             </button>
@@ -119,7 +119,7 @@ export function BodyEditor({
         )}
 
         {(bodyType === 'raw' || bodyType === 'json') && (
-          <div className="flex-1 min-h-[160px] w-full bg-zinc-950 border border-zinc-800 focus-within:border-violet-500/70 rounded-lg overflow-auto font-mono text-xs">
+          <div className="flex-1 min-h-[160px] w-full bg-zinc-950 border border-zinc-800 focus-within:border-orange-500/70 rounded-lg overflow-auto font-mono text-xs">
             <Editor
               value={body}
               onValueChange={onBodyChange}
@@ -136,7 +136,7 @@ export function BodyEditor({
                 fontFamily: '"JetBrains Mono", "Fira Code", monospace',
                 fontSize: 12,
                 minHeight: '160px',
-                color: '#fafafa',
+                color: 'var(--zinc-100)',
               }}
               textareaClassName="focus:outline-none w-full h-full min-h-[160px] bg-transparent resize-y"
               preClassName="min-h-[160px] pointer-events-none"

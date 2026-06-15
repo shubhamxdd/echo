@@ -32,7 +32,7 @@ export function StatusBar({
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium py-1">
-        <span className="w-3.5 h-3.5 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin" />
+        <span className="w-3.5 h-3.5 border-2 border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
         <span>Sending request...</span>
       </div>
     );

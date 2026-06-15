@@ -83,7 +83,7 @@ export function RequestPanel({
           onClick={() => setActiveTab('params')}
           className={`pb-2 transition-all relative cursor-pointer select-none ${
             activeTab === 'params'
-              ? 'text-violet-400 border-b-2 border-violet-500'
+              ? 'text-orange-400 border-b-2 border-orange-500'
               : 'text-zinc-500 hover:text-zinc-350'
           }`}
         >
@@ -99,7 +99,7 @@ export function RequestPanel({
           onClick={() => setActiveTab('headers')}
           className={`pb-2 transition-all relative cursor-pointer select-none ${
             activeTab === 'headers'
-              ? 'text-violet-400 border-b-2 border-violet-500'
+              ? 'text-orange-400 border-b-2 border-orange-500'
               : 'text-zinc-500 hover:text-zinc-355'
           }`}
         >
@@ -115,13 +115,13 @@ export function RequestPanel({
           onClick={() => setActiveTab('body')}
           className={`pb-2 transition-all relative cursor-pointer select-none ${
             activeTab === 'body'
-              ? 'text-violet-400 border-b-2 border-violet-500'
+              ? 'text-orange-400 border-b-2 border-orange-500'
               : 'text-zinc-500 hover:text-zinc-355'
           }`}
         >
           <span>Body</span>
           {isBodyActive && (
-            <span className="ml-1 w-1.5 h-1.5 bg-violet-450 rounded-full inline-block align-middle" />
+            <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
           )}
         </button>
 
@@ -129,13 +129,13 @@ export function RequestPanel({
           onClick={() => setActiveTab('auth')}
           className={`pb-2 transition-all relative cursor-pointer select-none ${
             activeTab === 'auth'
-              ? 'text-violet-400 border-b-2 border-violet-500'
+              ? 'text-orange-400 border-b-2 border-orange-500'
               : 'text-zinc-500 hover:text-zinc-355'
           }`}
         >
           <span>Authorization</span>
           {isAuthActive && (
-            <span className="ml-1 w-1.5 h-1.5 bg-violet-450 rounded-full inline-block align-middle" />
+            <span className="ml-1 w-1.5 h-1.5 bg-orange-450 rounded-full inline-block align-middle" />
           )}
         </button>
       </div>

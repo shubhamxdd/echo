@@ -8,9 +8,29 @@ import { useCollections } from './hooks/useCollections';
 import { useHistory } from './hooks/useHistory';
 import { useRequest } from './hooks/useRequest';
 import { Collection, SavedRequest, HistoryItem, HttpResponse, KeyValueItem } from './types';
+import { Sun, Moon } from 'lucide-react';
 
 function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved === 'dark';
+    return true; // default to dark mode
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   // Hook states
   const {
@@ -625,7 +645,7 @@ function App() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-500 font-medium select-none">Active Work:</span>
             {activeRequestMeta.id ? (
-              <span className="text-xs font-semibold text-violet-300 font-mono">
+              <span className="text-xs font-semibold text-orange-300 font-mono">
                 {activeRequestMeta.name}
               </span>
             ) : (
@@ -635,13 +655,23 @@ function App() {
             )}
           </div>
           
-          <button
-            onClick={handleNewRequest}
-            className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 py-1 px-2.5 rounded-md font-medium transition-all select-none"
-            title="Create clean request workspace (Ctrl+N)"
-          >
-            + New Tab
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleDarkMode}
+              className="text-zinc-400 hover:text-zinc-100 p-1.5 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer flex items-center justify-center"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+
+            <button
+              onClick={handleNewRequest}
+              className="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:border-zinc-700 py-1.5 px-2.5 rounded-md font-medium transition-all select-none cursor-pointer"
+              title="Create clean request workspace (Ctrl+N)"
+            >
+              + New Tab
+            </button>
+          </div>
         </div>
 
         {/* Workspace Tab Bar */}
@@ -654,7 +684,7 @@ function App() {
                 onClick={() => switchTab(tab.id)}
                 className={`group flex items-center gap-2 px-3 py-2 border-r border-zinc-800/60 cursor-pointer text-xs transition-colors shrink-0 h-full ${
                   isActive
-                    ? 'bg-zinc-900/30 text-violet-300 font-semibold border-b border-b-violet-500'
+                    ? 'bg-zinc-900/30 text-orange-300 font-semibold border-b border-b-orange-500'
                     : 'text-zinc-500 hover:text-zinc-350 hover:bg-zinc-900/10'
                 }`}
               >
@@ -662,7 +692,7 @@ function App() {
                   tab.method === 'GET' ? 'text-emerald-400' :
                   tab.method === 'POST' ? 'text-amber-400' :
                   tab.method === 'PUT' ? 'text-sky-400' :
-                  tab.method === 'DELETE' ? 'text-rose-400' : 'text-fuchsia-400'
+                  tab.method === 'DELETE' ? 'text-rose-400' : 'text-teal-400'
                 }`}>
                   {tab.method}
                 </span>
@@ -730,7 +760,7 @@ function App() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleColSubmit();
               }}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
               autoFocus
             />
           </div>
@@ -744,7 +774,7 @@ function App() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleColSubmit();
               }}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
             />
           </div>
           <div className="flex justify-end gap-2 border-t border-zinc-800 pt-3 mt-4">
@@ -757,7 +787,7 @@ function App() {
             <button
               onClick={handleColSubmit}
               disabled={!colModalName.trim()}
-              className="px-3.5 py-1.5 rounded-md text-xs bg-violet-600 hover:bg-violet-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {colModalMode === 'create' ? 'Create' : 'Save'}
             </button>
@@ -782,7 +812,7 @@ function App() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleConfirmSave();
               }}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-xs text-zinc-200"
               autoFocus
             />
           </div>
@@ -797,7 +827,7 @@ function App() {
               <select
                 value={saveReqCollectionId}
                 onChange={(e) => setSaveReqCollectionId(e.target.value)}
-                className="bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-zinc-200 text-xs w-full cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-zinc-200 text-xs w-full cursor-pointer"
               >
                 {flattenCollections(collections).map((col) => (
                   <option key={col.id} value={col.id}>
@@ -818,7 +848,7 @@ function App() {
             <button
               onClick={handleConfirmSave}
               disabled={!saveReqName.trim() || !saveReqCollectionId}
-              className="px-3.5 py-1.5 rounded-md text-xs bg-violet-600 hover:bg-violet-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3.5 py-1.5 rounded-md text-xs bg-orange-600 hover:bg-orange-500 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Save Request
             </button>

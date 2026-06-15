@@ -52,7 +52,7 @@ export function CollectionTree({
       case 'DELETE':
         return 'text-rose-400 font-bold';
       case 'PATCH':
-        return 'text-fuchsia-400 font-bold';
+        return 'text-teal-400 font-bold';
       default:
         return 'text-zinc-400 font-bold';
     }
@@ -78,7 +78,7 @@ export function CollectionTree({
                 <ChevronRight className="w-3.5 h-3.5" />
               )}
             </span>
-            <span className="text-violet-400">
+            <span className="text-orange-400">
               {isExpanded ? <FolderOpen className="w-4 h-4" /> : <Folder className="w-4 h-4" />}
             </span>
             <span className="text-xs font-medium truncate">{col.name}</span>
@@ -88,21 +88,21 @@ export function CollectionTree({
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => onCreateRequest(col.id)}
-              className="text-zinc-500 hover:text-violet-400 p-0.5 rounded hover:bg-zinc-800"
+              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
               title="Add request"
             >
               <FilePlus className="w-3 h-3" />
             </button>
             <button
               onClick={() => onCreateSubfolder(col.id)}
-              className="text-zinc-500 hover:text-violet-400 p-0.5 rounded hover:bg-zinc-800"
+              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
               title="New sub-collection"
             >
               <FolderPlus className="w-3 h-3" />
             </button>
             <button
               onClick={() => onExportFolder(col.id)}
-              className="text-zinc-500 hover:text-violet-400 p-0.5 rounded hover:bg-zinc-800"
+              className="text-zinc-500 hover:text-orange-400 p-0.5 rounded hover:bg-zinc-800"
               title="Export collection"
             >
               <Download className="w-3 h-3" />
@@ -139,7 +139,7 @@ export function CollectionTree({
                     key={req.id}
                     className={`group flex items-center justify-between py-1.5 px-2 rounded-md cursor-pointer transition-all ${
                       isActive
-                        ? 'bg-violet-950/20 text-violet-200 border-l-2 border-violet-500 font-medium'
+                        ? 'bg-orange-950/20 text-orange-200 border-l-2 border-orange-500 font-medium'
                         : 'hover:bg-zinc-800/30 text-zinc-400 hover:text-zinc-200'
                     }`}
                     style={{ paddingLeft: `${(depth + 1) * 12 + 18}px` }}

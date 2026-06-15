@@ -4,7 +4,7 @@ let dbInstance: Database | null = null;
 
 export async function getDb(): Promise<Database> {
   if (!dbInstance) {
-    dbInstance = await Database.load('sqlite:restdesk.db');
+    dbInstance = await Database.load('sqlite:echo.db');
   }
   return dbInstance;
 }

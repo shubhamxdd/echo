@@ -37,7 +37,7 @@ export function AuthEditor({
             onClick={() => onAuthTypeChange(opt.type as any)}
             className={`px-3 py-1.5 rounded-md border text-xs transition-colors select-none ${
               authType === opt.type
-                ? 'bg-violet-500/10 border-violet-500 text-violet-350 font-medium'
+                ? 'bg-orange-500/10 border-orange-500 text-orange-350 font-medium'
                 : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
             }`}
           >
@@ -64,7 +64,7 @@ export function AuthEditor({
               placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
               value={authData?.bearer_token || ''}
               onChange={(e) => handleFieldChange('bearer_token', e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
             />
             <p className="text-[10px] text-zinc-550 mt-1">
               Bearer tokens are automatically added to the <strong>Authorization</strong> header.
@@ -81,7 +81,7 @@ export function AuthEditor({
                 placeholder="admin"
                 value={authData?.basic_username || ''}
                 onChange={(e) => handleFieldChange('basic_username', e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250"
               />
             </div>
             <div className="space-y-1">
@@ -91,7 +91,7 @@ export function AuthEditor({
                 placeholder="password"
                 value={authData?.basic_password || ''}
                 onChange={(e) => handleFieldChange('basic_password', e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250"
               />
             </div>
             <p className="col-span-2 text-[10px] text-zinc-550 mt-1">
@@ -110,7 +110,7 @@ export function AuthEditor({
                   placeholder="X-API-Key"
                   value={authData?.apikey_key || ''}
                   onChange={(e) => handleFieldChange('apikey_key', e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
                 />
               </div>
               <div className="space-y-1">
@@ -120,7 +120,7 @@ export function AuthEditor({
                   placeholder="your-api-secret-key"
                   value={authData?.apikey_value || ''}
                   onChange={(e) => handleFieldChange('apikey_value', e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 font-mono text-zinc-250"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export function AuthEditor({
               <select
                 value={authData?.apikey_addTo || 'header'}
                 onChange={(e) => handleFieldChange('apikey_addTo', e.target.value)}
-                className="bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250 text-xs w-48 cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-2 px-3 text-zinc-250 text-xs w-48 cursor-pointer"
               >
                 <option value="header">Headers</option>
                 <option value="query">Query Params</option>

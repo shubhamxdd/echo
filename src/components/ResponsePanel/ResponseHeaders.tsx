@@ -33,7 +33,7 @@ export function ResponseHeaders({ headers }: ResponseHeadersProps) {
             placeholder="Search headers..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-1 pl-7 pr-3 text-[11px] text-zinc-350 placeholder-zinc-700 transition-colors font-mono"
+            className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-1 pl-7 pr-3 text-[11px] text-zinc-350 placeholder-zinc-700 transition-colors font-mono"
           />
         </div>
       )}
@@ -51,7 +51,7 @@ export function ResponseHeaders({ headers }: ResponseHeadersProps) {
                 key={header.key}
                 className="group flex items-start gap-4 p-2 hover:bg-zinc-800/10 font-mono text-[11px]"
               >
-                <div className="w-1/3 text-violet-400 font-semibold select-all truncate break-all">
+                <div className="w-1/3 text-orange-400 font-semibold select-all truncate break-all">
                   {header.key}
                 </div>
                 <div className="flex-1 text-zinc-300 select-all break-all whitespace-pre-wrap">

@@ -106,7 +106,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
                 onClick={() => setViewMode('pretty')}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors select-none ${
                   viewMode === 'pretty'
-                    ? 'bg-violet-500/15 text-violet-300 font-medium'
+                    ? 'bg-orange-500/15 text-orange-300 font-medium'
                     : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-zinc-300'
                 }`}
               >
@@ -118,7 +118,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
               onClick={() => setViewMode('raw')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors select-none ${
                 viewMode === 'raw'
-                  ? 'bg-violet-500/15 text-violet-300 font-medium'
+                  ? 'bg-orange-500/15 text-orange-300 font-medium'
                   : 'bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-555 hover:text-zinc-300'
               }`}
             >
@@ -136,7 +136,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
                 placeholder="Filter JSON tree..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-zinc-950 border border-zinc-850 focus:border-violet-500/70 focus:outline-none rounded py-1 pl-8 pr-3 text-[10px] text-zinc-300 placeholder-zinc-700 transition-colors w-40 font-mono"
+                className="bg-zinc-950 border border-zinc-850 focus:border-orange-500/70 focus:outline-none rounded py-1 pl-8 pr-3 text-[10px] text-zinc-300 placeholder-zinc-700 transition-colors w-40 font-mono"
               />
             </div>
           )}
@@ -177,7 +177,7 @@ export function JsonViewer({ body }: JsonViewerProps) {
               style={{
                 ...darkStyles,
                 container: 'bg-transparent text-zinc-350 leading-relaxed word-break-all',
-                label: 'text-violet-400 font-semibold',
+                label: 'text-orange-400 font-semibold',
                 stringValue: 'text-emerald-450 font-normal',
                 numberValue: 'text-amber-450',
                 booleanValue: 'text-sky-400 font-bold',

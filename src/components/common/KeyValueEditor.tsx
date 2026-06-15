@@ -68,21 +68,21 @@ export function KeyValueEditor({
               type="checkbox"
               checked={item.enabled}
               onChange={(e) => handleRowChange(index, 'enabled', e.target.checked)}
-              className="w-3.5 h-3.5 accent-violet-500 rounded border-zinc-700 bg-zinc-900 cursor-pointer"
+              className="w-3.5 h-3.5 accent-orange-500 rounded border-zinc-700 bg-zinc-900 cursor-pointer"
             />
             <input
               type="text"
               value={item.key}
               placeholder={placeholderKey}
               onChange={(e) => handleRowChange(index, 'key', e.target.value)}
-              className="bg-transparent border-b border-transparent hover:border-zinc-800 focus:border-violet-500 focus:outline-none py-1 px-1 text-zinc-200 placeholder-zinc-600 transition-all font-mono text-xs"
+              className="bg-transparent border-b border-transparent hover:border-zinc-800 focus:border-orange-500 focus:outline-none py-1 px-1 text-zinc-200 placeholder-zinc-600 transition-all font-mono text-xs"
             />
             <input
               type="text"
               value={item.value}
               placeholder={placeholderValue}
               onChange={(e) => handleRowChange(index, 'value', e.target.value)}
-              className="bg-transparent border-b border-transparent hover:border-zinc-800 focus:border-violet-500 focus:outline-none py-1 px-1 text-zinc-200 placeholder-zinc-600 transition-all font-mono text-xs"
+              className="bg-transparent border-b border-transparent hover:border-zinc-800 focus:border-orange-500 focus:outline-none py-1 px-1 text-zinc-200 placeholder-zinc-600 transition-all font-mono text-xs"
             />
             <button
               onClick={() => deleteRow(index)}
@@ -96,7 +96,7 @@ export function KeyValueEditor({
       </div>
       <button
         onClick={addRow}
-        className="mt-2 flex items-center gap-1.5 px-2.5 py-1 text-xs text-violet-400 hover:bg-violet-500/10 rounded-md transition-colors font-medium"
+        className="mt-2 flex items-center gap-1.5 px-2.5 py-1 text-xs text-orange-400 hover:bg-orange-500/10 rounded-md transition-colors font-medium"
       >
         <Plus className="w-3 h-3" /> Add Row
       </button>

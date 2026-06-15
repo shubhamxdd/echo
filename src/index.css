@@ -1,15 +1,144 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --bg-base: #09090b;
-  --bg-surface: #18181b;
+  --color-zinc-50: var(--zinc-50);
+  --color-zinc-100: var(--zinc-100);
+  --color-zinc-200: var(--zinc-200);
+  --color-zinc-250: var(--zinc-250);
+  --color-zinc-300: var(--zinc-300);
+  --color-zinc-350: var(--zinc-350);
+  --color-zinc-400: var(--zinc-400);
+  --color-zinc-405: var(--zinc-405);
+  --color-zinc-500: var(--zinc-500);
+  --color-zinc-550: var(--zinc-550);
+  --color-zinc-555: var(--zinc-555);
+  --color-zinc-600: var(--zinc-600);
+  --color-zinc-650: var(--zinc-650);
+  --color-zinc-700: var(--zinc-700);
+  --color-zinc-800: var(--zinc-800);
+  --color-zinc-850: var(--zinc-850);
+  --color-zinc-900: var(--zinc-900);
+  --color-zinc-950: var(--zinc-950);
+
+  --color-orange-300: var(--orange-300);
+  --color-orange-350: var(--orange-350);
+  --color-orange-400: var(--orange-400);
+  --color-orange-405: var(--orange-405);
+  --color-orange-450: var(--orange-450);
+  --color-orange-500: var(--orange-500);
+  --color-orange-600: var(--orange-600);
+
+  --color-emerald-450: var(--emerald-450);
+  --color-amber-450: var(--amber-450);
+
+  /* Map variables to Tailwind utility colors */
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-panel: var(--bg-panel);
+  --color-border-def: var(--border-default);
+  --color-accent-prim: var(--accent-primary);
+  --color-text-main: var(--text-primary);
+  --color-text-mut: var(--text-muted);
+}
+
+:root {
+  /* Default Light Mode Theme Colors (Postman-inspired Orange & Clean Slate/Light Gray) */
+  --zinc-50: #09090b;       /* Dark text */
+  --zinc-100: #1c1c1f;      /* Primary text (normally almost white in dark mode, now dark) */
+  --zinc-200: #27272a;      /* Secondary text */
+  --zinc-250: #3f3f46;
+  --zinc-300: #3f3f46;
+  --zinc-350: #52525b;
+  --zinc-400: #71717a;      /* Muted text */
+  --zinc-405: #ea580c;      /* Orange brand accent for hover text */
+  --zinc-500: #71717a;      /* Muted text/icons */
+  --zinc-550: #71717a;
+  --zinc-555: #52525b;
+  --zinc-600: #a1a1aa;      /* Border/disabled */
+  --zinc-650: #52525b;      /* Close tab button icon */
+  --zinc-700: #d4d4d8;      /* Borders focus */
+  --zinc-800: #e4e4e7;      /* Borders default (normally dark border, now light) */
+  --zinc-850: #f4f4f5;      /* Button hover background */
+  --zinc-900: #f4f4f5;      /* Base container background (sidebar, tab strip bg) */
+  --zinc-950: #ffffff;      /* Surface background (editor, input, response pane, tabs) */
+
+  --orange-300: #fdba74;    /* orange-300 */
+  --orange-350: #fdbaf4;    /* orange highlight */
+  --orange-400: #ea580c;    /* orange-600 */
+  --orange-405: #ea580c;    /* orange-600 */
+  --orange-450: #ea580c;    /* orange-600 */
+  --orange-500: #ea580c;    /* orange-600 */
+  --orange-600: #ea580c;    /* orange-600 */
+
+  --emerald-450: #047857;   /* emerald-700 for GET */
+  --amber-450: #b45309;     /* amber-700 for POST */
+
+  /* Semantic Theme Variables */
+  --bg-base: var(--zinc-900);
+  --bg-surface: var(--zinc-950);
+  --bg-panel: rgba(228, 228, 231, 0.4);
+  --text-primary: var(--zinc-100);
+  --text-muted: var(--zinc-400);
+  --accent-primary: var(--orange-600);
+  --border-default: var(--zinc-800);
+  --state-success: #059669; /* emerald-600 */
+  --state-error: #dc2626;   /* red-600 */
+
+  /* Prism Highlighting variables */
+  --token-number: #b45309;     /* amber-700 */
+  --token-punctuation: #52525b;
+  --token-comment: #71717a;
+}
+
+.dark {
+  /* Dark Mode Theme Overrides */
+  --zinc-50: #fafafa;
+  --zinc-100: #f4f4f5;
+  --zinc-200: #e4e4e7;
+  --zinc-250: #d4d4d8;
+  --zinc-300: #d4d4d8;
+  --zinc-350: #a1a1aa;
+  --zinc-400: #a1a1aa;
+  --zinc-405: #f97316;      /* Orange brand accent for hover text */
+  --zinc-500: #71717a;
+  --zinc-550: #52525b;
+  --zinc-555: #52525b;
+  --zinc-600: #52525b;
+  --zinc-650: #a1a1aa;
+  --zinc-700: #3f3f46;
+  --zinc-800: #27272a;
+  --zinc-850: #202023;
+  --zinc-900: #18181b;
+  --zinc-950: #09090b;
+
+  --orange-300: #fdba74;
+  --orange-350: #fdba74;
+  --orange-400: #f97316;
+  --orange-405: #f97316;
+  --orange-450: #ea580c;
+  --orange-500: #f97316;
+  --orange-600: #ea580c;
+
+  --emerald-450: #34d399;   /* emerald-400 for GET */
+  --amber-450: #fbbf24;     /* amber-400 for POST */
+
+  /* Semantic Theme Variables */
+  --bg-base: var(--zinc-950);
+  --bg-surface: var(--zinc-900);
   --bg-panel: rgba(39, 39, 42, 0.4);
-  --text-primary: #fafafa;
-  --text-muted: #a1a1aa;
-  --accent-primary: #a78bfa;
-  --border-default: #27272a;
-  --state-success: #34d399;
-  --state-error: #f87171;
+  --text-primary: var(--zinc-50);
+  --text-muted: var(--zinc-400);
+  --accent-primary: var(--orange-500);
+  --border-default: var(--zinc-800);
+  --state-success: #34d399; /* emerald-400 */
+  --state-error: #f87171;   /* red-400 */
+
+  /* Prism Highlighting variables */
+  --token-number: #fbbf24;     /* amber-400 */
+  --token-punctuation: #a1a1aa;
+  --token-comment: #71717a;
 }
 
 @layer base {
@@ -38,15 +167,14 @@
 .token.number,
 .token.keyword,
 .token.class-name {
-  color: #fbbf24 !important;
+  color: var(--token-number) !important;
 }
 
 .token.punctuation,
 .token.operator {
-  color: #a1a1aa !important;
+  color: var(--token-punctuation) !important;
 }
 
 .token.comment {
-  color: #52525b !important;
+  color: var(--token-comment) !important;
 }
-

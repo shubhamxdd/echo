@@ -100,16 +100,16 @@ export function Sidebar({
       {/* Sidebar Header */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center font-bold text-sm text-white">
-            R
+          <div className="w-6 h-6 bg-orange-600 rounded-md flex items-center justify-center font-bold text-sm text-white">
+            E
           </div>
-          <span className="font-semibold text-xs tracking-wide text-zinc-100">RestDesk</span>
+          <span className="font-semibold text-xs tracking-wide text-zinc-100">Echo</span>
         </div>
         <div className="flex items-center gap-1">
           {/* Help Button */}
           <button
             onClick={onHelpClick}
-            className="text-zinc-400 hover:text-violet-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
+            className="text-zinc-400 hover:text-orange-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
             title="Keyboard Shortcuts (?)"
           >
             <HelpCircle className="w-4 h-4" />
@@ -117,7 +117,7 @@ export function Sidebar({
 
           {/* Import Button */}
           <label
-            className="text-zinc-400 hover:text-violet-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors cursor-pointer"
+            className="text-zinc-400 hover:text-orange-405 p-1.5 rounded-md hover:bg-zinc-850 transition-colors cursor-pointer"
             title="Import collection"
           >
             <Upload className="w-4 h-4" />
@@ -146,7 +146,7 @@ export function Sidebar({
           {/* Create Collection */}
           <button
             onClick={onCreateCollectionClick}
-            className="text-zinc-400 hover:text-violet-400 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
+            className="text-zinc-400 hover:text-orange-400 p-1.5 rounded-md hover:bg-zinc-850 transition-colors"
             title="Create new collection"
           >
             <FolderPlus className="w-4 h-4" />
@@ -189,7 +189,7 @@ export function Sidebar({
             placeholder={activeTab === 'collections' ? 'Filter collections...' : 'Filter history...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded-md py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
+            className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded-md py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-700 transition-colors"
           />
         </div>
       </div>

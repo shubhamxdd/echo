@@ -1,6 +1,6 @@
-# RestDesk — Personal API Client
+# Echo — Personal API Client
 
-RestDesk is a lightweight, local-first REST API client built with Tauri v2, React, TypeScript, Tailwind CSS v4, and SQLite. It provides a clean, native developer experience with CORS-free network requests, recursive collection hierarchies, and persistent request history.
+Echo is a lightweight, local-first REST API client built with Tauri v2, React, TypeScript, Tailwind CSS v4, and SQLite. It provides a clean, native developer experience with CORS-free network requests, recursive collection hierarchies, and persistent request history.
 
 ---
 
@@ -59,8 +59,8 @@ The output executables will be generated at:
 ## Key Configurations
 
 ### 1. Local Database
-RestDesk stores collections, saved requests, and request history locally in a SQLite database.
-* **Database Path**: `%APPDATA%\RestDesk\restdesk.db` (on Windows).
+Echo stores collections, saved requests, and request history locally in a SQLite database.
+* **Database Path**: `%APPDATA%\Echo\echo.db` (on Windows).
 * Deleting a collection cascades and automatically removes all child collections and saved requests.
 
 ### 2. Network Requests & CORS
@@ -70,7 +70,7 @@ The application utilizes Tauri's native HTTP client to execute requests. This op
 ---
 
 ## Keyboard Shortcuts
-RestDesk supports fast keyboard shortcuts to speed up your testing workflows:
+Echo supports fast keyboard shortcuts to speed up your testing workflows:
 * **`Ctrl + Enter`**: Execute the current HTTP request (Send).
 * **`Ctrl + S`**: Save the current request configurations to a collection folder.
 * **`Ctrl + N`**: Clear the workspace and reset to a new, empty request.

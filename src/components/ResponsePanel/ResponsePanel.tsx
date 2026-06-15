@@ -20,7 +20,7 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
       {/* Response Panel Title & Status Line */}
       <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
         <div className="flex items-center gap-1.5">
-          <Terminal className="w-4 h-4 text-violet-400" />
+          <Terminal className="w-4 h-4 text-orange-400" />
           <h2 className="text-xs font-semibold text-zinc-150 uppercase tracking-wider">Response</h2>
         </div>
         
@@ -40,7 +40,7 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
         {loading ? (
           // Loading State
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-550 text-xs">
-            <span className="w-6 h-6 border-2 border-zinc-700 border-t-violet-500 rounded-full animate-spin" />
+            <span className="w-6 h-6 border-2 border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
             <span>Executing request... Bypassing CORS natively...</span>
           </div>
         ) : !response ? (
@@ -70,7 +70,7 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
                 onClick={() => setActiveTab('body')}
                 className={`pb-1.5 transition-all relative cursor-pointer select-none ${
                   activeTab === 'body'
-                    ? 'text-violet-400 border-b-2 border-violet-500'
+                    ? 'text-orange-400 border-b-2 border-orange-500'
                     : 'text-zinc-500 hover:text-zinc-350'
                 }`}
               >
@@ -81,7 +81,7 @@ export function ResponsePanel({ response, loading }: ResponsePanelProps) {
                 onClick={() => setActiveTab('headers')}
                 className={`pb-1.5 transition-all relative cursor-pointer select-none ${
                   activeTab === 'headers'
-                    ? 'text-violet-400 border-b-2 border-violet-500'
+                    ? 'text-orange-400 border-b-2 border-orange-500'
                     : 'text-zinc-500 hover:text-zinc-350'
                 }`}
               >

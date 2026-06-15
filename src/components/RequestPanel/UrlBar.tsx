@@ -30,7 +30,7 @@ export function UrlBar({
       case 'POST': return 'text-amber-400';
       case 'PUT': return 'text-sky-400';
       case 'DELETE': return 'text-rose-400';
-      case 'PATCH': return 'text-fuchsia-400';
+      case 'PATCH': return 'text-teal-400';
       default: return 'text-zinc-400';
     }
   };
@@ -79,7 +79,7 @@ export function UrlBar({
               onSend();
             }
           }}
-          className="w-full bg-zinc-950 border border-zinc-800 focus:border-violet-500/70 focus:outline-none rounded py-1.5 px-3 text-xs font-mono text-zinc-200 placeholder-zinc-700 transition-colors"
+          className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 focus:outline-none rounded py-1.5 px-3 text-xs font-mono text-zinc-200 placeholder-zinc-700 transition-colors"
         />
       </div>
 
@@ -100,7 +100,7 @@ export function UrlBar({
         className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded text-white transition-all select-none shadow ${
           loading
             ? 'bg-amber-600 cursor-not-allowed hover:bg-amber-600'
-            : 'bg-violet-600 hover:bg-violet-500 active:scale-98 cursor-pointer'
+            : 'bg-orange-600 hover:bg-orange-500 active:scale-98 cursor-pointer'
         }`}
       >
         {loading ? (

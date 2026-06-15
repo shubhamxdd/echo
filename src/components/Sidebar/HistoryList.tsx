@@ -25,7 +25,7 @@ export function HistoryList({
       case 'DELETE':
         return 'text-rose-400 bg-rose-500/10 border border-rose-500/20';
       case 'PATCH':
-        return 'text-fuchsia-400 bg-fuchsia-500/10 border border-fuchsia-500/20';
+        return 'text-teal-400 bg-teal-500/10 border border-teal-500/20';
       default:
         return 'text-zinc-400 bg-zinc-500/10 border border-zinc-500/20';
     }
